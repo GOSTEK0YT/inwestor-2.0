@@ -1,6 +1,7 @@
 services:
-  - type: static
+  - type: web
     name: inwestor-2
+    runtime: static
     plan: free
     buildCommand: ""
     staticPublishPath: .
