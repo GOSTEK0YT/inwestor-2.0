@@ -1,0 +1,10 @@
+services:
+  - type: static
+    name: inwestor-2
+    plan: free
+    buildCommand: ""
+    staticPublishPath: .
+    routes:
+      - type: rewrite
+        source: /*
+        destination: /index.html
