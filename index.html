@@ -1,0 +1,200 @@
+<!doctype html>
+<html lang="pl">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Inwestor 2.0</title>
+    <link rel="stylesheet" href="styles.css">
+  </head>
+  <body>
+    <main class="shell">
+      <section class="game-board" aria-label="Inwestor 2.0">
+        <header class="topbar">
+          <div>
+            <p class="kicker">crypto game</p>
+            <h1>Inwestor 2.0</h1>
+          </div>
+          <div class="hud" aria-label="Panel gracza">
+            <div class="wallet" aria-label="Portfel gracza">
+              <span class="ticker-card">
+                <strong id="activeCoinPrice">100.00 zł / LTC</strong>
+                aktywna cena
+              </span>
+              <span><strong id="portfolioValue">0.00</strong> zł w krypto</span>
+              <span class="cash-card">
+                <strong id="cash">50.00</strong> zł
+                <button id="infiniteMoneyBtn" type="button" class="test-money">∞</button>
+              </span>
+            </div>
+            <div class="level-card">
+              <div class="level-line">
+                <strong>Poziom <span id="playerLevel">1</span></strong>
+                <span id="xpText">0 / 100 EXP</span>
+              </div>
+              <span class="xp-track"><span id="xpFill"></span></span>
+            </div>
+          </div>
+        </header>
+
+        <nav class="tabs" aria-label="Sekcje gry">
+          <button class="tab is-active" type="button" data-panel="casinoPanel">Kasyno</button>
+          <button class="tab" type="button" data-panel="marketPanel">Giełda</button>
+          <button class="tab" type="button" data-panel="miningPanel">Koparki</button>
+          <button class="tab" type="button" data-panel="bankPanel">Bank</button>
+          <button class="tab" type="button" data-panel="shopPanel">Sklep</button>
+          <button class="tab" type="button" data-panel="realEstatePanel">Nieruchomości</button>
+        </nav>
+
+        <section id="casinoPanel" class="panel is-active">
+          <div class="casino-grid">
+            <article class="casino-machine">
+              <div class="machine-header">
+                <div>
+                  <h2>Królewski Obrót</h2>
+                  <p class="quiet">Jedno pociągnięcie kosztuje 5 zł. Trzy takie same symbole dają dużą wypłatę.</p>
+                </div>
+                <span class="price-pill">5 zł / spin</span>
+              </div>
+
+              <div class="slot-frame">
+                <div class="slot-light"></div>
+                <div id="slotReels" class="slot-reels" aria-live="polite">
+                  <span>7</span><span>★</span><span>◆</span>
+                </div>
+              </div>
+
+              <div class="controls">
+                <button id="spinBtn" type="button">Pociągnij</button>
+                <button id="resetSlotsBtn" type="button" class="secondary">Wyczyść wynik</button>
+              </div>
+              <div class="mini-stats">
+                <span>Wygrane: <strong id="wins">0</strong></span>
+                <span>Ostatnio: <strong id="slotStatus">Gotowe</strong></span>
+              </div>
+            </article>
+
+            <article class="casino-machine">
+              <div class="machine-header">
+                <div>
+                  <h2>Ruletka</h2>
+                  <p class="quiet">Czerwony i czarny płacą x2. Zielony jest rzadki, ale płaci x20.</p>
+                </div>
+              </div>
+
+              <div class="roulette-wrap">
+                <div id="rouletteWheel" class="roulette-wheel" aria-hidden="true">
+                  <div class="roulette-ball"></div>
+                </div>
+                <div class="roulette-result">
+                  <span>Wynik</span>
+                  <strong id="rouletteResult">-</strong>
+                </div>
+              </div>
+
+              <label for="rouletteBet">Kwota zakładu</label>
+              <div class="input-row">
+                <input id="rouletteBet" type="number" min="1" max="500" step="1" value="10">
+                <button id="rouletteSpinBtn" type="button">Zakręć</button>
+              </div>
+
+              <div class="color-picker" aria-label="Kolor zakładu">
+                <button class="color-bet is-active red" type="button" data-color="red">Czerwony x2</button>
+                <button class="color-bet black" type="button" data-color="black">Czarny x2</button>
+                <button class="color-bet green" type="button" data-color="green">Zielony x20</button>
+              </div>
+              <div class="mini-stats">
+                <span>Postawiono na: <strong id="selectedRouletteColor">Czerwony</strong></span>
+                <span>Ostatnio: <strong id="rouletteStatus">Gotowe</strong></span>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="marketPanel" class="panel">
+          <div class="market-grid">
+            <article class="market-card wide">
+              <div class="machine-header">
+                <div>
+                  <h2>Giełda kryptowalut</h2>
+                  <p class="quiet">Wybierz walutę, obserwuj wykres i handluj. Ceny zmieniają się automatycznie.</p>
+                </div>
+                <button id="tickPriceBtn" type="button" class="secondary">Odśwież ceny</button>
+              </div>
+
+              <div id="coinList" class="coin-list" aria-label="Lista kryptowalut"></div>
+              <canvas id="priceChart" width="820" height="260" aria-label="Wykres wybranej kryptowaluty"></canvas>
+              <div class="price-line">
+                <span id="priceChange">0.00%</span>
+                <span id="coinHolding">Masz 0.000000 LTC</span>
+              </div>
+
+              <label for="coinAmount">Ilość wybranej waluty</label>
+              <div class="input-row compact">
+                <input id="coinAmount" type="number" min="0" step="0.000001" value="0.01">
+                <button id="buyBtn" type="button">Kup</button>
+                <button id="sellBtn" type="button" class="secondary">Sprzedaj</button>
+              </div>
+              <button id="buyMaxBtn" type="button" class="full secondary">Kup max</button>
+            </article>
+
+            <aside class="market-card">
+              <h2>Portfel</h2>
+              <p class="quiet">Twoje aktualne krypto i wartość według obecnych cen.</p>
+              <div id="holdingsList" class="holdings-list"></div>
+            </aside>
+          </div>
+        </section>
+
+        <section id="miningPanel" class="panel">
+          <div id="minersList" class="miners-list"></div>
+        </section>
+
+        <section id="bankPanel" class="panel">
+          <article class="market-card placeholder-panel">
+            <h2>Bank</h2>
+            <p class="quiet">Tutaj później dodamy lokaty, wpłaty, wypłaty i odsetki.</p>
+          </article>
+        </section>
+
+        <section id="shopPanel" class="panel">
+          <article class="market-card placeholder-panel">
+            <h2>Sklep</h2>
+            <p class="quiet">Tutaj później trafią bonusy, ulepszenia konta i specjalne przedmioty.</p>
+          </article>
+        </section>
+
+        <section id="realEstatePanel" class="panel">
+          <div class="hub-grid">
+            <article class="market-card hub-card">
+              <h2>Nieruchomości</h2>
+              <p class="quiet">Wybierz, czy chcesz kupić nowe nieruchomości, czy zobaczyć te, które już posiadasz.</p>
+              <div class="hub-actions">
+                <button type="button" data-panel-target="realEstateShopPanel">Sklep nieruchomości</button>
+                <button type="button" class="secondary" data-panel-target="myRealEstatePanel">Moje nieruchomości</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="realEstateShopPanel" class="panel">
+          <article class="market-card placeholder-panel">
+            <button type="button" class="back-button secondary" data-panel-target="realEstatePanel">Powrót</button>
+            <h2>Sklep nieruchomości</h2>
+            <p class="quiet">Tutaj później będzie kupowanie mieszkań, garaży, sklepów i biur.</p>
+          </article>
+        </section>
+
+        <section id="myRealEstatePanel" class="panel">
+          <article class="market-card placeholder-panel">
+            <button type="button" class="back-button secondary" data-panel-target="realEstatePanel">Powrót</button>
+            <h2>Moje nieruchomości</h2>
+            <p class="quiet">Tutaj później pokażemy kupione nieruchomości, dochód i ulepszenia.</p>
+          </article>
+        </section>
+      </section>
+    </main>
+
+    <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <script src="script.js"></script>
+  </body>
+</html>
