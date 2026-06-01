@@ -40,6 +40,13 @@ const ROUTER_DURATION = 5 * 60 * 1000;
 const LUCKY_CHARM_PRICE = 5000;
 const LUCKY_CHARM_BONUS = 0.05;
 const SLOT_SYMBOLS = ["7", "★", "◆", "●", "L"];
+const SLOT_NON_SEVEN_SYMBOLS = SLOT_SYMBOLS.filter((symbol) => symbol !== "7");
+const SLOT_PAYOUTS = {
+  jackpot: { chance: 0.1, prize: 15000, xp: 120, label: "777" },
+  twoSevens: { chance: 0.5, prize: 1000, xp: 45, label: "77" },
+  triple: { chance: 1, prize: 500, xp: 25, label: "trzy znaki" },
+  pair: { chance: 8, prize: 100, xp: 10, label: "dwa znaki" }
+};
 const ROULETTE_GREEN_SIZE = 9.73;
 const ROULETTE_COLOR_SIZE = (360 - ROULETTE_GREEN_SIZE) / 18;
 const ROULETTE_LABELS = {
@@ -719,6 +726,58 @@ function clearSlotTimers() {
   state.slotTimers = [];
 }
 
+function randomItem(items) {
+  return items[Math.floor(Math.random() * items.length)];
+}
+
+function shuffleSymbols(symbols) {
+  return [...symbols].sort(() => Math.random() - 0.5);
+}
+
+function losingSlotSymbols() {
+  const symbols = Array.from({ length: 3 }, () => randomItem(SLOT_SYMBOLS));
+  const allSame = symbols.every((symbol) => symbol === symbols[0]);
+  const hasPair = new Set(symbols).size < 3;
+  if (!allSame && !hasPair) return symbols;
+  return losingSlotSymbols();
+}
+
+function twoSevensSymbols() {
+  return shuffleSymbols(["7", "7", randomItem(SLOT_NON_SEVEN_SYMBOLS)]);
+}
+
+function pairSymbols() {
+  const pair = randomItem(SLOT_NON_SEVEN_SYMBOLS);
+  const others = SLOT_SYMBOLS.filter((symbol) => symbol !== pair);
+  return shuffleSymbols([pair, pair, randomItem(others)]);
+}
+
+function slotOutcome() {
+  const roll = Math.random() * 100;
+  let cursor = SLOT_PAYOUTS.jackpot.chance;
+  if (roll < cursor) {
+    return { symbols: ["7", "7", "7"], ...SLOT_PAYOUTS.jackpot };
+  }
+
+  cursor += SLOT_PAYOUTS.twoSevens.chance;
+  if (roll < cursor) {
+    return { symbols: twoSevensSymbols(), ...SLOT_PAYOUTS.twoSevens };
+  }
+
+  cursor += SLOT_PAYOUTS.triple.chance;
+  if (roll < cursor) {
+    const symbol = randomItem(SLOT_NON_SEVEN_SYMBOLS);
+    return { symbols: [symbol, symbol, symbol], ...SLOT_PAYOUTS.triple };
+  }
+
+  cursor += SLOT_PAYOUTS.pair.chance;
+  if (roll < cursor || luckyCharmHits()) {
+    return { symbols: pairSymbols(), ...SLOT_PAYOUTS.pair };
+  }
+
+  return { symbols: losingSlotSymbols(), prize: 0, xp: 0, label: "pudło" };
+}
+
 function renderAll() {
   renderWallet();
   renderLevel();
@@ -742,12 +801,8 @@ function spinSlots() {
   state.cash -= SLOT_COST;
   addXp(1);
   els.slotStatus.textContent = "Kręci się";
-  let result = Array.from({ length: 3 }, () => SLOT_SYMBOLS[Math.floor(Math.random() * SLOT_SYMBOLS.length)]);
-  if (!result.every((symbol) => symbol === result[0]) && luckyCharmHits()) {
-    const luckySymbol = SLOT_SYMBOLS[Math.floor(Math.random() * SLOT_SYMBOLS.length)];
-    result = [luckySymbol, luckySymbol, luckySymbol];
-  }
-  renderSpinningSlots(result);
+  const outcome = slotOutcome();
+  renderSpinningSlots(outcome.symbols);
   els.slotFrame.classList.add("is-spinning");
   els.slotReels.classList.add("is-spinning");
   renderWallet();
@@ -756,25 +811,16 @@ function spinSlots() {
     clearSlotTimers();
     els.slotFrame.classList.remove("is-spinning");
     els.slotReels.classList.remove("is-spinning");
-    renderSlots(result);
+    renderSlots(outcome.symbols);
     state.slotSpinning = false;
 
-    const allSame = result.every((symbol) => symbol === result[0]);
-    const twoSevens = result.filter((symbol) => symbol === "7").length === 2;
-    if (allSame) {
-      const prize = result[0] === "7" ? 250 : 90;
-      state.cash += prize;
+    if (outcome.prize > 0) {
+      state.cash += outcome.prize;
       state.wins += 1;
-      els.slotStatus.textContent = `+${prize} zł`;
+      els.slotStatus.textContent = `+${outcome.prize} zł`;
       flashElement(els.slotReels, "is-win");
-      addXp(result[0] === "7" ? 30 : 12);
-      showToast(`Sloty wypłaciły ${prize} zł.`);
-    } else if (twoSevens) {
-      state.cash += 25;
-      els.slotStatus.textContent = "+25 zł";
-      flashElement(els.slotReels, "is-win");
-      addXp(6);
-      showToast("Dwie siódemki: +25 zł.");
+      addXp(outcome.xp);
+      showToast(`${outcome.label}: +${outcome.prize} zł.`);
     } else {
       els.slotStatus.textContent = "Pudło";
     }
