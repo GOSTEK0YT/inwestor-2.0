@@ -45,7 +45,7 @@ const SLOT_PAYOUTS = {
   jackpot: { chance: 0.1, prize: 15000, xp: 120, label: "777" },
   twoSevens: { chance: 0.5, prize: 1000, xp: 45, label: "77" },
   triple: { chance: 1, prize: 500, xp: 25, label: "trzy znaki" },
-  pair: { chance: 8, prize: 100, xp: 10, label: "dwa znaki" }
+  pair: { chance: 10, prize: 100, xp: 10, label: "dwa znaki" }
 };
 const ROULETTE_GREEN_SIZE = 9.73;
 const ROULETTE_COLOR_SIZE = (360 - ROULETTE_GREEN_SIZE) / 18;
