@@ -23,15 +23,19 @@ const state = {
   deposit: null,
   loanDebt: 0,
   inventory: {
-    energyDrink: 0
+    energyDrink: 0,
+    router: 0
   },
   xpBoostUntil: 0,
+  miningBoostUntil: 0,
 };
 
 const SLOT_COST = 5;
 const LOAN_RATE = 0.15;
 const ENERGY_DRINK_PRICE = 30;
 const ENERGY_DRINK_DURATION = 5 * 60 * 1000;
+const ROUTER_PRICE = 50;
+const ROUTER_DURATION = 5 * 60 * 1000;
 const SLOT_SYMBOLS = ["7", "★", "◆", "●", "L"];
 const ROULETTE_GREEN_SIZE = 9.73;
 const ROULETTE_COLOR_SIZE = (360 - ROULETTE_GREEN_SIZE) / 18;
@@ -93,11 +97,16 @@ const els = {
   loanStatus: $("#loanStatus"),
   repayLoanBtn: $("#repayLoanBtn"),
   buyEnergyDrinkBtn: $("#buyEnergyDrinkBtn"),
+  buyRouterBtn: $("#buyRouterBtn"),
   energyInventoryCard: $("#energyInventoryCard"),
+  routerInventoryCard: $("#routerInventoryCard"),
   emptyInventoryCard: $("#emptyInventoryCard"),
   energyDrinkCount: $("#energyDrinkCount"),
+  routerCount: $("#routerCount"),
   xpBoostStatus: $("#xpBoostStatus"),
-  useEnergyDrinkBtn: $("#useEnergyDrinkBtn")
+  miningBoostStatus: $("#miningBoostStatus"),
+  useEnergyDrinkBtn: $("#useEnergyDrinkBtn"),
+  useRouterBtn: $("#useRouterBtn")
 };
 
 let lastCash = state.cash;
@@ -192,6 +201,10 @@ function xpForNextLevel() {
 
 function xpMultiplier() {
   return Date.now() < state.xpBoostUntil ? 2 : 1;
+}
+
+function miningMultiplier() {
+  return Date.now() < state.miningBoostUntil ? 2 : 1;
 }
 
 function addXp(amount, reason) {
@@ -455,23 +468,60 @@ function useEnergyDrink() {
   renderAll();
 }
 
+function buyRouter() {
+  if (state.cash < ROUTER_PRICE) {
+    showToast("Brakuje złotówek na ruter.");
+    return;
+  }
+
+  state.cash -= ROUTER_PRICE;
+  state.inventory.router += 1;
+  showToast("Kupiono nowy ruter 2x wydobycie.");
+  renderAll();
+}
+
+function useRouter() {
+  if (state.inventory.router <= 0) {
+    showToast("Nie masz rutera w ekwipunku.");
+    return;
+  }
+
+  state.inventory.router -= 1;
+  state.miningBoostUntil = Math.max(Date.now(), state.miningBoostUntil) + ROUTER_DURATION;
+  showToast("Ruter działa: 2x wydobycie przez 5 minut.");
+  renderAll();
+}
+
 function renderShop() {
   els.buyEnergyDrinkBtn.disabled = state.cash < ENERGY_DRINK_PRICE;
+  els.buyRouterBtn.disabled = state.cash < ROUTER_PRICE;
 }
 
 function renderInventory() {
-  const count = state.inventory.energyDrink;
+  const energyCount = state.inventory.energyDrink;
+  const routerCount = state.inventory.router;
   const boostLeft = state.xpBoostUntil - Date.now();
+  const miningBoostLeft = state.miningBoostUntil - Date.now();
   const isBoostActive = boostLeft > 0;
+  const isMiningBoostActive = miningBoostLeft > 0;
 
-  els.energyDrinkCount.textContent = `x${count}`;
-  els.useEnergyDrinkBtn.disabled = count <= 0;
-  els.energyInventoryCard.hidden = count <= 0 && !isBoostActive;
-  els.emptyInventoryCard.hidden = count > 0 || isBoostActive;
+  els.energyDrinkCount.textContent = `x${energyCount}`;
+  els.useEnergyDrinkBtn.disabled = energyCount <= 0;
+  els.energyInventoryCard.hidden = energyCount <= 0 && !isBoostActive;
   els.xpBoostStatus.textContent = isBoostActive
     ? `Aktywne: ${formatTime(boostLeft)}`
     : "Bonus nieaktywny";
   els.xpBoostStatus.classList.toggle("is-active", isBoostActive);
+
+  els.routerCount.textContent = `x${routerCount}`;
+  els.useRouterBtn.disabled = routerCount <= 0;
+  els.routerInventoryCard.hidden = routerCount <= 0 && !isMiningBoostActive;
+  els.miningBoostStatus.textContent = isMiningBoostActive
+    ? `Aktywne: ${formatTime(miningBoostLeft)}`
+    : "Bonus nieaktywny";
+  els.miningBoostStatus.classList.toggle("is-active", isMiningBoostActive);
+
+  els.emptyInventoryCard.hidden = energyCount > 0 || routerCount > 0 || isBoostActive || isMiningBoostActive;
 }
 
 function renderCoins() {
@@ -905,7 +955,7 @@ function minerInterval(miner) {
 
 function minerReward(miner) {
   const coin = coins[state.miningCoin];
-  return coin.mineYield * (1 + miner.bigger * 0.45);
+  return coin.mineYield * (1 + miner.bigger * 0.45) * miningMultiplier();
 }
 
 function totalMiningReward() {
@@ -1029,6 +1079,8 @@ $("#takeLoanBtn").addEventListener("click", takeLoan);
 $("#repayLoanBtn").addEventListener("click", repayLoan);
 $("#buyEnergyDrinkBtn").addEventListener("click", buyEnergyDrink);
 $("#useEnergyDrinkBtn").addEventListener("click", useEnergyDrink);
+$("#buyRouterBtn").addEventListener("click", buyRouter);
+$("#useRouterBtn").addEventListener("click", useRouter);
 $("#profileBtn").addEventListener("click", openProfile);
 $("#profileCloseBtn").addEventListener("click", closeProfile);
 $("#adminUnlockBtn").addEventListener("click", unlockAdminPanel);

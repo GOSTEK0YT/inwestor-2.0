@@ -6,7 +6,7 @@
     <title>Inwestor 2.0</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
-    <link rel="stylesheet" href="styles.css?v=shop-2">
+    <link rel="stylesheet" href="styles.css?v=shop-4">
   </head>
   <body>
     <main class="shell">
@@ -230,6 +230,14 @@
                 <button id="buyEnergyDrinkBtn" type="button" class="full">Kup za 30 zł</button>
               </div>
             </article>
+            <article class="market-card product-card">
+              <img class="product-art" src="assets/router.png" alt="Nowy ruter 2x wydobycie">
+              <div class="product-body">
+                <h2>Nowy ruter</h2>
+                <p class="quiet">2x wydobycie przez 5 minut.</p>
+                <button id="buyRouterBtn" type="button" class="full">Kup za 50 zł</button>
+              </div>
+            </article>
           </div>
         </section>
 
@@ -245,6 +253,18 @@
                 <p class="quiet">2x EXP przez 5 minut.</p>
                 <span id="xpBoostStatus" class="boost-pill">Bonus nieaktywny</span>
                 <button id="useEnergyDrinkBtn" type="button" class="full secondary">Użyj</button>
+              </div>
+            </article>
+            <article id="routerInventoryCard" class="market-card product-card inventory-card">
+              <img class="product-art" src="assets/router.png" alt="Nowy ruter 2x wydobycie">
+              <div class="product-body">
+                <div class="product-title-row">
+                  <h2>Nowy ruter</h2>
+                  <span id="routerCount" class="item-count">x0</span>
+                </div>
+                <p class="quiet">2x wydobycie przez 5 minut.</p>
+                <span id="miningBoostStatus" class="boost-pill">Bonus nieaktywny</span>
+                <button id="useRouterBtn" type="button" class="full secondary">Użyj</button>
               </div>
             </article>
             <article id="emptyInventoryCard" class="market-card placeholder-panel inventory-empty">
@@ -311,6 +331,6 @@
         </div>
       </section>
     </div>
-    <script src="script.js?v=shop-2"></script>
+    <script src="script.js?v=shop-4"></script>
   </body>
 </html>
