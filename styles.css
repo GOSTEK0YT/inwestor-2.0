@@ -1100,6 +1100,93 @@ canvas {
   border-top: 1px solid var(--line);
 }
 
+.admin-easter-egg {
+  position: relative;
+  overflow: hidden;
+  min-height: 116px;
+  margin-top: 1rem;
+  border: 1px solid rgba(82, 211, 185, 0.55);
+  border-radius: 8px;
+  display: grid;
+  place-items: center;
+  background: radial-gradient(circle at 50% 20%, rgba(82, 211, 185, 0.22), rgba(22, 27, 33, 0.94) 64%);
+}
+
+.admin-easter-egg[hidden] {
+  display: none;
+}
+
+.admin-easter-egg strong {
+  position: relative;
+  z-index: 2;
+  max-width: 280px;
+  color: var(--ink);
+  font-size: 1.35rem;
+  text-align: center;
+  text-transform: uppercase;
+}
+
+.sixty-seven-rain {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.sixty-seven-rain span {
+  position: absolute;
+  top: -26px;
+  color: rgba(82, 211, 185, 0.48);
+  font-weight: 900;
+  font-size: 1.35rem;
+  animation: fall67 1500ms linear infinite;
+}
+
+.sixty-seven-rain span:nth-child(1) {
+  left: 6%;
+  animation-delay: 0ms;
+}
+
+.sixty-seven-rain span:nth-child(2) {
+  left: 24%;
+  animation-delay: 220ms;
+}
+
+.sixty-seven-rain span:nth-child(3) {
+  left: 42%;
+  animation-delay: 460ms;
+}
+
+.sixty-seven-rain span:nth-child(4) {
+  left: 60%;
+  animation-delay: 130ms;
+}
+
+.sixty-seven-rain span:nth-child(5) {
+  left: 78%;
+  animation-delay: 620ms;
+}
+
+.sixty-seven-rain span:nth-child(6) {
+  left: 90%;
+  animation-delay: 340ms;
+}
+
+@keyframes fall67 {
+  from {
+    transform: translateY(0) rotate(-10deg);
+    opacity: 0;
+  }
+
+  15% {
+    opacity: 1;
+  }
+
+  to {
+    transform: translateY(152px) rotate(16deg);
+    opacity: 0;
+  }
+}
+
 .admin-grid {
   display: grid;
   grid-template-columns: 1fr auto;

@@ -31,7 +31,7 @@ const ROULETTE_LABELS = {
   black: "Czarny",
   green: "Zielony"
 };
-const ADMIN_CODE = "INWESTOR20";
+const ADMIN_CODE = "codex";
 
 const $ = (selector) => document.querySelector(selector);
 
@@ -62,6 +62,7 @@ const els = {
   minersList: $("#minersList"),
   profileOverlay: $("#profileOverlay"),
   adminCodeInput: $("#adminCodeInput"),
+  adminEasterEgg: $("#adminEasterEgg"),
   adminPanel: $("#adminPanel"),
   adminMoneyInput: $("#adminMoneyInput"),
   adminXpInput: $("#adminXpInput")
@@ -180,13 +181,14 @@ function closeProfile() {
 }
 
 function unlockAdminPanel() {
-  if (els.adminCodeInput.value.trim().toUpperCase() !== ADMIN_CODE) {
+  if (els.adminCodeInput.value.trim().toLowerCase() !== ADMIN_CODE) {
     showToast("Zły kod admina.");
     return;
   }
 
+  els.adminEasterEgg.hidden = false;
   els.adminPanel.hidden = false;
-  showToast("Panel admina odblokowany.");
+  showToast("67. Panel admina odblokowany.");
 }
 
 function addAdminMoney() {

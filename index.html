@@ -6,7 +6,7 @@
     <title>Inwestor 2.0</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
-    <link rel="stylesheet" href="styles.css?v=profile-admin-1">
+    <link rel="stylesheet" href="styles.css?v=profile-admin-2">
   </head>
   <body>
     <main class="shell">
@@ -190,11 +190,16 @@
       <section class="profile-modal" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
         <button id="profileCloseBtn" type="button" class="modal-close" aria-label="Zamknij">×</button>
         <h2 id="profileTitle">Profil</h2>
-        <p class="quiet">Panel testowy jest ukryty za kodem.</p>
-        <label for="adminCodeInput">Kod admina</label>
+        <label for="adminCodeInput">Miejsce na kod</label>
         <div class="input-row compact">
           <input id="adminCodeInput" type="password" autocomplete="off" placeholder="Wpisz kod">
           <button id="adminUnlockBtn" type="button">Odblokuj</button>
+        </div>
+        <div id="adminEasterEgg" class="admin-easter-egg" hidden>
+          <strong>serio miłosz znowu 67</strong>
+          <div class="sixty-seven-rain" aria-hidden="true">
+            <span>67</span><span>67</span><span>67</span><span>67</span><span>67</span><span>67</span>
+          </div>
         </div>
         <div id="adminPanel" class="admin-panel" hidden>
           <div class="admin-grid">
@@ -212,6 +217,6 @@
         </div>
       </section>
     </div>
-    <script src="script.js?v=profile-admin-1"></script>
+    <script src="script.js?v=profile-admin-2"></script>
   </body>
 </html>
