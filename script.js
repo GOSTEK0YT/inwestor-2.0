@@ -67,11 +67,13 @@ const els = {
   coinAmount: $("#coinAmount"),
   minersList: $("#minersList"),
   profileOverlay: $("#profileOverlay"),
+  profileModal: $(".profile-modal"),
   adminCodeInput: $("#adminCodeInput"),
   adminEasterEgg: $("#adminEasterEgg"),
   adminPanel: $("#adminPanel"),
   adminMoneyInput: $("#adminMoneyInput"),
   adminXpInput: $("#adminXpInput"),
+  adminTimeInput: $("#adminTimeInput"),
   depositAmount: $("#depositAmount"),
   depositStatus: $("#depositStatus"),
   depositPayout: $("#depositPayout"),
@@ -89,6 +91,7 @@ const els = {
 
 let lastCash = state.cash;
 let lastPortfolio = portfolioValue();
+let profilePointerStartedOnOverlay = false;
 
 function money(value) {
   if (value >= 1000) return value.toLocaleString("pl-PL", { maximumFractionDigits: 2 });
@@ -246,6 +249,23 @@ function addAdminXp() {
   }
 
   addXp(amount, "panel admina");
+}
+
+function advanceAdminTime() {
+  const minutes = Math.floor(Number(els.adminTimeInput.value));
+  if (!Number.isFinite(minutes) || minutes <= 0) {
+    showToast("Wpisz poprawną liczbę minut.");
+    return;
+  }
+
+  if (!state.deposit) {
+    showToast("Nie ma aktywnej lokaty do przyspieszenia.");
+    return;
+  }
+
+  state.deposit.startedAt -= minutes * 60000;
+  renderBank();
+  showToast(`Admin: przyspieszono czas o ${minutes} min.`);
 }
 
 function depositPayout(deposit) {
@@ -916,11 +936,19 @@ $("#profileCloseBtn").addEventListener("click", closeProfile);
 $("#adminUnlockBtn").addEventListener("click", unlockAdminPanel);
 $("#adminAddMoneyBtn").addEventListener("click", addAdminMoney);
 $("#adminAddXpBtn").addEventListener("click", addAdminXp);
+$("#adminAdvanceTimeBtn").addEventListener("click", advanceAdminTime);
 els.adminCodeInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter") unlockAdminPanel();
 });
+els.profileModal.addEventListener("click", (event) => {
+  event.stopPropagation();
+});
+els.profileOverlay.addEventListener("pointerdown", (event) => {
+  profilePointerStartedOnOverlay = event.target === els.profileOverlay;
+});
 els.profileOverlay.addEventListener("click", (event) => {
-  if (event.target === els.profileOverlay) closeProfile();
+  if (profilePointerStartedOnOverlay && event.target === els.profileOverlay) closeProfile();
+  profilePointerStartedOnOverlay = false;
 });
 window.addEventListener("keydown", (event) => {
   if (event.key === "Escape" && !els.profileOverlay.hidden) closeProfile();
