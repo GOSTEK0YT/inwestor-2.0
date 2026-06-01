@@ -481,6 +481,10 @@ h2 {
   align-items: start;
 }
 
+.inventory-grid {
+  justify-content: center;
+}
+
 .product-card {
   display: grid;
   gap: 1rem;
@@ -552,6 +556,10 @@ h2 {
 
 .inventory-empty {
   min-height: 220px;
+  width: min(520px, 100%);
+  justify-self: center;
+  justify-items: center;
+  text-align: center;
 }
 
 .real-estate-card {
