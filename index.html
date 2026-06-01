@@ -6,7 +6,7 @@
     <title>Inwestor 2.0</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
-    <link rel="stylesheet" href="styles.css?v=bank-4">
+    <link rel="stylesheet" href="styles.css?v=bank-5">
   </head>
   <body>
     <main class="shell">
@@ -157,14 +157,19 @@
               <div class="machine-header">
                 <div>
                   <h2>Lokata</h2>
-                  <p class="quiet">Zablokuj złotówki na minimum 10 minut i odbierz je z zyskiem.</p>
+                  <p class="quiet">Zostaw u nas pieniądze, a my je pomnożymy.</p>
                 </div>
-                <span class="bank-rate">+5%</span>
+                <span id="depositRateLabel" class="bank-rate">+5%</span>
               </div>
               <label for="depositAmount">Kwota lokaty</label>
               <div class="input-row">
                 <input id="depositAmount" type="number" min="10" step="10" value="100">
-                <button id="startDepositBtn" type="button">Załóż lokatę</button>
+                <select id="depositDuration" aria-label="Czas lokaty">
+                  <option value="10" data-rate="0.05">10 min • 5%</option>
+                  <option value="30" data-rate="0.08">30 min • 8%</option>
+                  <option value="60" data-rate="0.12">60 min • 12%</option>
+                  <option value="120" data-rate="0.15">120 min • 15%</option>
+                </select>
               </div>
               <div class="bank-status">
                 <div>
@@ -179,7 +184,7 @@
               <div id="depositProgressWrap" class="bank-progress" aria-label="Postęp lokaty" hidden>
                 <span id="depositProgress"></span>
               </div>
-              <button id="claimDepositBtn" type="button" class="full secondary">Odbierz pieniądze</button>
+              <button id="depositActionBtn" type="button" class="full secondary">Załóż lokatę</button>
             </article>
 
             <article class="market-card bank-card loan-card">
@@ -278,6 +283,6 @@
         </div>
       </section>
     </div>
-    <script src="script.js?v=bank-4"></script>
+    <script src="script.js?v=bank-5"></script>
   </body>
 </html>
