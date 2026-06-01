@@ -32,6 +32,7 @@ const ROULETTE_LABELS = {
   green: "Zielony"
 };
 const ADMIN_CODE = "codex";
+const EASTER_EGG_CODE = "67";
 
 const $ = (selector) => document.querySelector(selector);
 
@@ -181,14 +182,23 @@ function closeProfile() {
 }
 
 function unlockAdminPanel() {
-  if (els.adminCodeInput.value.trim().toLowerCase() !== ADMIN_CODE) {
+  const code = els.adminCodeInput.value.trim().toLowerCase();
+
+  if (code === EASTER_EGG_CODE) {
+    els.adminPanel.hidden = true;
+    els.adminEasterEgg.hidden = false;
+    showToast("serio miłosz znowu 67");
+    return;
+  }
+
+  if (code !== ADMIN_CODE) {
     showToast("Zły kod admina.");
     return;
   }
 
-  els.adminEasterEgg.hidden = false;
+  els.adminEasterEgg.hidden = true;
   els.adminPanel.hidden = false;
-  showToast("67. Panel admina odblokowany.");
+  showToast("Panel admina odblokowany.");
 }
 
 function addAdminMoney() {
