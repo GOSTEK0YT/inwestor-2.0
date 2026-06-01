@@ -648,15 +648,18 @@ function renderMining() {
   }).join("");
 
   const nextIndex = state.miners.length + 1;
+  const requiredLevel = minerRequiredLevel(nextIndex);
+  const hasRequiredLevel = state.level >= requiredLevel;
   const buyRow = `
     <div class="miner-row">
       <article class="printer-card miner-buy-card">
         <h3>Nowa koparka</h3>
-        <button id="buyMinerBtn" type="button" class="buy-printer">
+        <button id="buyMinerBtn" type="button" class="buy-printer" ${hasRequiredLevel ? "" : "disabled"}>
           <span class="plus-box">+</span>
           <span>
             <strong>Dokup koparkę</strong>
             <small>koszt: ${minerCost} zł</small>
+            <small>wymagany poziom: ${requiredLevel}</small>
           </span>
         </button>
       </article>
@@ -1009,6 +1012,10 @@ function minerPurchaseCost() {
   return 100 * 2 ** state.miners.length;
 }
 
+function minerRequiredLevel(minerIndex) {
+  return Math.max(1, (minerIndex - 1) * 2);
+}
+
 function minerUpgradeCost(miner, type) {
   const base = type === "faster" ? 20 : 30;
   return base * 2 ** miner[type];
@@ -1076,6 +1083,13 @@ function toggleMining(force) {
 }
 
 function buyMiner() {
+  const nextIndex = state.miners.length + 1;
+  const requiredLevel = minerRequiredLevel(nextIndex);
+  if (state.level < requiredLevel) {
+    showToast(`Koparka ${nextIndex} wymaga poziomu ${requiredLevel}.`);
+    return;
+  }
+
   const cost = minerPurchaseCost();
   if (state.cash < cost) {
     showToast("Nie stać Cię na nową koparkę.");
