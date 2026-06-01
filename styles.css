@@ -365,6 +365,11 @@ h2 {
   align-content: center;
 }
 
+.real-estate-card {
+  position: relative;
+  padding-top: 58px;
+}
+
 .panel-card-header {
   display: flex;
   justify-content: space-between;
@@ -376,6 +381,23 @@ h2 {
 
 .panel-card-header h2 {
   margin: 0;
+}
+
+.real-estate-card .panel-card-header {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  left: 18px;
+  width: auto;
+  margin: 0;
+}
+
+.real-estate-card .back-button {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  margin: 0;
+  justify-self: auto;
 }
 
 .hub-grid {
