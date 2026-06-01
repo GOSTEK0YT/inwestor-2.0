@@ -59,6 +59,13 @@ button:active {
   transform: translateY(0);
 }
 
+button:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
+  transform: none;
+  filter: none;
+}
+
 button.secondary {
   background: var(--button);
   color: var(--button-ink);
@@ -461,6 +468,97 @@ h2 {
   min-height: 260px;
   display: grid;
   align-content: center;
+}
+
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 340px));
+  gap: 18px;
+  align-items: start;
+}
+
+.product-card {
+  display: grid;
+  gap: 1rem;
+  overflow: hidden;
+  padding: 0;
+}
+
+.product-art {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1;
+  object-fit: cover;
+  background: #101419;
+  border-bottom: 1px solid var(--line);
+}
+
+.product-body {
+  display: grid;
+  gap: 0.55rem;
+  padding: 0 16px 16px;
+}
+
+.product-body h2,
+.product-body .quiet {
+  margin: 0;
+}
+
+.product-price {
+  display: block;
+  width: fit-content;
+  border: 1px solid rgba(242, 201, 76, 0.52);
+  border-radius: 999px;
+  padding: 0.4rem 0.65rem;
+  color: var(--accent);
+  background: rgba(242, 201, 76, 0.1);
+  font-size: 1.05rem;
+}
+
+.product-title-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.75rem;
+}
+
+.item-count,
+.boost-pill {
+  display: inline-flex;
+  align-items: center;
+  width: fit-content;
+  border: 1px solid var(--line);
+  border-radius: 999px;
+  padding: 0.35rem 0.6rem;
+  color: var(--muted);
+  background: #101419;
+  font-weight: 900;
+}
+
+.item-count {
+  color: #071410;
+  background: var(--accent-2);
+  border-color: var(--accent-2);
+}
+
+.boost-pill.is-active {
+  color: #071410;
+  background: var(--accent);
+  border-color: var(--accent);
+  animation: boostPulse 1200ms ease-in-out infinite;
+}
+
+@keyframes boostPulse {
+  0%, 100% {
+    box-shadow: 0 0 0 rgba(242, 201, 76, 0);
+  }
+  50% {
+    box-shadow: 0 0 20px rgba(242, 201, 76, 0.22);
+  }
+}
+
+.inventory-empty {
+  min-height: 220px;
 }
 
 .real-estate-card {
@@ -1398,6 +1496,10 @@ canvas {
   .bank-status,
   .color-picker,
   .coin-list {
+    grid-template-columns: 1fr;
+  }
+
+  .product-grid {
     grid-template-columns: 1fr;
   }
 

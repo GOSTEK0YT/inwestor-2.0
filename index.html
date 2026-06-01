@@ -6,7 +6,7 @@
     <title>Inwestor 2.0</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
-    <link rel="stylesheet" href="styles.css?v=bank-5">
+    <link rel="stylesheet" href="styles.css?v=shop-1">
   </head>
   <body>
     <main class="shell">
@@ -44,6 +44,7 @@
           <button class="tab" type="button" data-panel="miningPanel">Koparki</button>
           <button class="tab" type="button" data-panel="bankPanel">Bank</button>
           <button class="tab" type="button" data-panel="shopPanel">Sklep</button>
+          <button class="tab" type="button" data-panel="inventoryPanel">Ekwipunek</button>
           <button class="tab" type="button" data-panel="realEstatePanel">Nieruchomości</button>
         </nav>
 
@@ -220,10 +221,38 @@
         </section>
 
         <section id="shopPanel" class="panel">
-          <article class="market-card placeholder-panel">
-            <h2>Sklep</h2>
-            <p class="quiet">Tutaj później trafią bonusy, ulepszenia konta i specjalne przedmioty.</p>
-          </article>
+          <div class="product-grid">
+            <article class="market-card product-card">
+              <img class="product-art" src="assets/energy-drink.svg" alt="Energetyk 2x EXP">
+              <div class="product-body">
+                <h2>Energetyk</h2>
+                <p class="quiet">2x EXP przez 5 minut.</p>
+                <strong class="product-price">30 zł</strong>
+                <button id="buyEnergyDrinkBtn" type="button" class="full">Kup za 30 zł</button>
+              </div>
+            </article>
+          </div>
+        </section>
+
+        <section id="inventoryPanel" class="panel">
+          <div class="product-grid">
+            <article id="energyInventoryCard" class="market-card product-card inventory-card">
+              <img class="product-art" src="assets/energy-drink.svg" alt="Energetyk 2x EXP">
+              <div class="product-body">
+                <div class="product-title-row">
+                  <h2>Energetyk</h2>
+                  <span id="energyDrinkCount" class="item-count">x0</span>
+                </div>
+                <p class="quiet">2x EXP przez 5 minut.</p>
+                <span id="xpBoostStatus" class="boost-pill">Bonus nieaktywny</span>
+                <button id="useEnergyDrinkBtn" type="button" class="full secondary">Użyj</button>
+              </div>
+            </article>
+            <article id="emptyInventoryCard" class="market-card placeholder-panel inventory-empty">
+              <h2>Ekwipunek</h2>
+              <p class="quiet">Kup coś w sklepie, a pojawi się tutaj.</p>
+            </article>
+          </div>
         </section>
 
         <section id="realEstatePanel" class="panel">
@@ -283,6 +312,6 @@
         </div>
       </section>
     </div>
-    <script src="script.js?v=bank-5"></script>
+    <script src="script.js?v=shop-1"></script>
   </body>
 </html>

@@ -22,10 +22,16 @@ const state = {
   miningTimer: null,
   deposit: null,
   loanDebt: 0,
+  inventory: {
+    energyDrink: 0
+  },
+  xpBoostUntil: 0,
 };
 
 const SLOT_COST = 5;
 const LOAN_RATE = 0.15;
+const ENERGY_DRINK_PRICE = 30;
+const ENERGY_DRINK_DURATION = 5 * 60 * 1000;
 const SLOT_SYMBOLS = ["7", "★", "◆", "●", "L"];
 const ROULETTE_GREEN_SIZE = 9.73;
 const ROULETTE_COLOR_SIZE = (360 - ROULETTE_GREEN_SIZE) / 18;
@@ -85,7 +91,13 @@ const els = {
   creditLimit: $("#creditLimit"),
   loanDebt: $("#loanDebt"),
   loanStatus: $("#loanStatus"),
-  repayLoanBtn: $("#repayLoanBtn")
+  repayLoanBtn: $("#repayLoanBtn"),
+  buyEnergyDrinkBtn: $("#buyEnergyDrinkBtn"),
+  energyInventoryCard: $("#energyInventoryCard"),
+  emptyInventoryCard: $("#emptyInventoryCard"),
+  energyDrinkCount: $("#energyDrinkCount"),
+  xpBoostStatus: $("#xpBoostStatus"),
+  useEnergyDrinkBtn: $("#useEnergyDrinkBtn")
 };
 
 let lastCash = state.cash;
@@ -178,10 +190,16 @@ function xpForNextLevel() {
   return 100 + (state.level - 1) * 50;
 }
 
+function xpMultiplier() {
+  return Date.now() < state.xpBoostUntil ? 2 : 1;
+}
+
 function addXp(amount, reason) {
   if (amount <= 0) return;
 
-  state.xp += amount;
+  const multiplier = xpMultiplier();
+  const gained = amount * multiplier;
+  state.xp += gained;
   let leveledUp = false;
   while (state.xp >= xpForNextLevel()) {
     state.xp -= xpForNextLevel();
@@ -193,7 +211,7 @@ function addXp(amount, reason) {
   if (leveledUp) {
     showToast(`Awans! Poziom ${state.level}.`);
   } else if (reason) {
-    showToast(`+${amount} EXP: ${reason}`);
+    showToast(`+${gained} EXP${multiplier > 1 ? " (x2)" : ""}: ${reason}`);
   }
 }
 
@@ -413,6 +431,49 @@ function repayLoan() {
   renderAll();
 }
 
+function buyEnergyDrink() {
+  if (state.cash < ENERGY_DRINK_PRICE) {
+    showToast("Brakuje złotówek na energetyka.");
+    return;
+  }
+
+  state.cash -= ENERGY_DRINK_PRICE;
+  state.inventory.energyDrink += 1;
+  showToast("Kupiono energetyka 2x EXP.");
+  renderAll();
+}
+
+function useEnergyDrink() {
+  if (state.inventory.energyDrink <= 0) {
+    showToast("Nie masz energetyka w ekwipunku.");
+    return;
+  }
+
+  state.inventory.energyDrink -= 1;
+  state.xpBoostUntil = Math.max(Date.now(), state.xpBoostUntil) + ENERGY_DRINK_DURATION;
+  showToast("Energetyk działa: 2x EXP przez 5 minut.");
+  renderAll();
+}
+
+function renderShop() {
+  els.buyEnergyDrinkBtn.disabled = state.cash < ENERGY_DRINK_PRICE;
+}
+
+function renderInventory() {
+  const count = state.inventory.energyDrink;
+  const boostLeft = state.xpBoostUntil - Date.now();
+  const isBoostActive = boostLeft > 0;
+
+  els.energyDrinkCount.textContent = `x${count}`;
+  els.useEnergyDrinkBtn.disabled = count <= 0;
+  els.energyInventoryCard.hidden = count <= 0 && !isBoostActive;
+  els.emptyInventoryCard.hidden = count > 0 || isBoostActive;
+  els.xpBoostStatus.textContent = isBoostActive
+    ? `Aktywne: ${formatTime(boostLeft)}`
+    : "Bonus nieaktywny";
+  els.xpBoostStatus.classList.toggle("is-active", isBoostActive);
+}
+
 function renderCoins() {
   els.coinList.innerHTML = Object.entries(coins).map(([symbol, coin]) => `
     <button class="coin-button ${symbol === state.activeCoin ? "is-active" : ""}" type="button" data-coin="${symbol}">
@@ -571,6 +632,8 @@ function clearSlotTimers() {
 function renderAll() {
   renderWallet();
   renderLevel();
+  renderShop();
+  renderInventory();
   renderCoins();
   renderHoldings();
   renderMining();
@@ -964,6 +1027,8 @@ els.depositAmount.addEventListener("input", updateDepositOffer);
 els.depositDuration.addEventListener("change", updateDepositOffer);
 $("#takeLoanBtn").addEventListener("click", takeLoan);
 $("#repayLoanBtn").addEventListener("click", repayLoan);
+$("#buyEnergyDrinkBtn").addEventListener("click", buyEnergyDrink);
+$("#useEnergyDrinkBtn").addEventListener("click", useEnergyDrink);
 $("#profileBtn").addEventListener("click", openProfile);
 $("#profileCloseBtn").addEventListener("click", closeProfile);
 $("#adminUnlockBtn").addEventListener("click", unlockAdminPanel);
@@ -1010,6 +1075,7 @@ window.addEventListener("resize", updateRouletteRadius);
 
 window.setInterval(tickPrices, 1000);
 window.setInterval(renderBank, 1000);
+window.setInterval(renderInventory, 1000);
 updateRouletteRadius();
 renderSlots();
 renderAll();
