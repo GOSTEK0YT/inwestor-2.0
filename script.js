@@ -24,7 +24,8 @@ const state = {
   loanDebt: 0,
   inventory: {
     energyDrink: 0,
-    router: 0
+    router: 0,
+    luckyCharm: 0
   },
   xpBoostUntil: 0,
   miningBoostUntil: 0,
@@ -36,6 +37,8 @@ const ENERGY_DRINK_PRICE = 30;
 const ENERGY_DRINK_DURATION = 5 * 60 * 1000;
 const ROUTER_PRICE = 50;
 const ROUTER_DURATION = 5 * 60 * 1000;
+const LUCKY_CHARM_PRICE = 5000;
+const LUCKY_CHARM_BONUS = 0.05;
 const SLOT_SYMBOLS = ["7", "★", "◆", "●", "L"];
 const ROULETTE_GREEN_SIZE = 9.73;
 const ROULETTE_COLOR_SIZE = (360 - ROULETTE_GREEN_SIZE) / 18;
@@ -98,11 +101,14 @@ const els = {
   repayLoanBtn: $("#repayLoanBtn"),
   buyEnergyDrinkBtn: $("#buyEnergyDrinkBtn"),
   buyRouterBtn: $("#buyRouterBtn"),
+  buyLuckyCharmBtn: $("#buyLuckyCharmBtn"),
   energyInventoryCard: $("#energyInventoryCard"),
   routerInventoryCard: $("#routerInventoryCard"),
+  luckyCharmInventoryCard: $("#luckyCharmInventoryCard"),
   emptyInventoryCard: $("#emptyInventoryCard"),
   energyDrinkCount: $("#energyDrinkCount"),
   routerCount: $("#routerCount"),
+  luckyCharmCount: $("#luckyCharmCount"),
   xpBoostStatus: $("#xpBoostStatus"),
   miningBoostStatus: $("#miningBoostStatus"),
   useEnergyDrinkBtn: $("#useEnergyDrinkBtn"),
@@ -207,6 +213,14 @@ function miningMultiplier() {
   return Date.now() < state.miningBoostUntil ? 2 : 1;
 }
 
+function hasLuckyCharm() {
+  return state.inventory.luckyCharm > 0;
+}
+
+function luckyCharmHits() {
+  return hasLuckyCharm() && Math.random() < LUCKY_CHARM_BONUS;
+}
+
 function addXp(amount, reason) {
   if (amount <= 0) return;
 
@@ -272,7 +286,7 @@ function addAdminMoney() {
   }
 
   state.cash += amount;
-  renderWallet();
+  renderAll();
   showToast(`Admin: dodano ${money(amount)} zł.`);
 }
 
@@ -492,14 +506,34 @@ function useRouter() {
   renderAll();
 }
 
+function buyLuckyCharm() {
+  if (state.inventory.luckyCharm > 0) {
+    showToast("Lucky charm jest już w ekwipunku.");
+    return;
+  }
+
+  if (state.cash < LUCKY_CHARM_PRICE) {
+    showToast("Brakuje złotówek na lucky charm.");
+    return;
+  }
+
+  state.cash -= LUCKY_CHARM_PRICE;
+  state.inventory.luckyCharm = 1;
+  showToast("Kupiono lucky charm: +5% szans w kasynie.");
+  renderAll();
+}
+
 function renderShop() {
   els.buyEnergyDrinkBtn.disabled = state.cash < ENERGY_DRINK_PRICE;
   els.buyRouterBtn.disabled = state.cash < ROUTER_PRICE;
+  els.buyLuckyCharmBtn.disabled = state.cash < LUCKY_CHARM_PRICE || hasLuckyCharm();
+  els.buyLuckyCharmBtn.textContent = hasLuckyCharm() ? "Kupiono" : "Kup za 5000 zł";
 }
 
 function renderInventory() {
   const energyCount = state.inventory.energyDrink;
   const routerCount = state.inventory.router;
+  const luckyCharmCount = state.inventory.luckyCharm;
   const boostLeft = state.xpBoostUntil - Date.now();
   const miningBoostLeft = state.miningBoostUntil - Date.now();
   const isBoostActive = boostLeft > 0;
@@ -521,7 +555,10 @@ function renderInventory() {
     : "Bonus nieaktywny";
   els.miningBoostStatus.classList.toggle("is-active", isMiningBoostActive);
 
-  els.emptyInventoryCard.hidden = energyCount > 0 || routerCount > 0 || isBoostActive || isMiningBoostActive;
+  els.luckyCharmCount.textContent = `x${luckyCharmCount}`;
+  els.luckyCharmInventoryCard.hidden = luckyCharmCount <= 0;
+
+  els.emptyInventoryCard.hidden = energyCount > 0 || routerCount > 0 || luckyCharmCount > 0 || isBoostActive || isMiningBoostActive;
 }
 
 function renderCoins() {
@@ -702,7 +739,11 @@ function spinSlots() {
   state.cash -= SLOT_COST;
   addXp(1);
   els.slotStatus.textContent = "Kręci się";
-  const result = Array.from({ length: 3 }, () => SLOT_SYMBOLS[Math.floor(Math.random() * SLOT_SYMBOLS.length)]);
+  let result = Array.from({ length: 3 }, () => SLOT_SYMBOLS[Math.floor(Math.random() * SLOT_SYMBOLS.length)]);
+  if (!result.every((symbol) => symbol === result[0]) && luckyCharmHits()) {
+    const luckySymbol = SLOT_SYMBOLS[Math.floor(Math.random() * SLOT_SYMBOLS.length)];
+    result = [luckySymbol, luckySymbol, luckySymbol];
+  }
   renderSpinningSlots(result);
   els.slotFrame.classList.add("is-spinning");
   els.slotReels.classList.add("is-spinning");
@@ -750,8 +791,21 @@ function resetSlots() {
 
 function rouletteOutcome() {
   const number = Math.floor(Math.random() * 37);
-  if (number === 0) return { number, color: "green" };
-  return { number, color: number % 2 === 0 ? "black" : "red" };
+  let outcome = number === 0
+    ? { number, color: "green" }
+    : { number, color: number % 2 === 0 ? "black" : "red" };
+
+  if (outcome.color !== state.selectedRouletteColor && luckyCharmHits()) {
+    if (state.selectedRouletteColor === "green") {
+      outcome = { number: 0, color: "green" };
+    } else if (state.selectedRouletteColor === "red") {
+      outcome = { number: 1 + Math.floor(Math.random() * 18) * 2, color: "red" };
+    } else {
+      outcome = { number: 2 + Math.floor(Math.random() * 18) * 2, color: "black" };
+    }
+  }
+
+  return outcome;
 }
 
 function rouletteBallAngle(outcome) {
@@ -1081,6 +1135,7 @@ $("#buyEnergyDrinkBtn").addEventListener("click", buyEnergyDrink);
 $("#useEnergyDrinkBtn").addEventListener("click", useEnergyDrink);
 $("#buyRouterBtn").addEventListener("click", buyRouter);
 $("#useRouterBtn").addEventListener("click", useRouter);
+$("#buyLuckyCharmBtn").addEventListener("click", buyLuckyCharm);
 $("#profileBtn").addEventListener("click", openProfile);
 $("#profileCloseBtn").addEventListener("click", closeProfile);
 $("#adminUnlockBtn").addEventListener("click", unlockAdminPanel);
