@@ -365,6 +365,19 @@ h2 {
   align-content: center;
 }
 
+.panel-card-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 1rem;
+  width: 100%;
+  margin-bottom: 0.75rem;
+}
+
+.panel-card-header h2 {
+  margin: 0;
+}
+
 .hub-grid {
   display: grid;
   grid-template-columns: minmax(320px, 620px);

@@ -87,8 +87,10 @@ function showToast(message) {
 }
 
 function switchPanel(panelId) {
+  const activeTabPanel = panelId === "myRealEstatePanel" ? "realEstatePanel" : panelId;
+
   document.querySelectorAll(".tab").forEach((tab) => {
-    tab.classList.toggle("is-active", tab.dataset.panel === panelId);
+    tab.classList.toggle("is-active", tab.dataset.panel === activeTabPanel);
   });
   document.querySelectorAll(".panel").forEach((panel) => {
     panel.classList.toggle("is-active", panel.id === panelId);
