@@ -504,17 +504,6 @@ h2 {
   margin: 0;
 }
 
-.product-price {
-  display: block;
-  width: fit-content;
-  border: 1px solid rgba(242, 201, 76, 0.52);
-  border-radius: 999px;
-  padding: 0.4rem 0.65rem;
-  color: var(--accent);
-  background: rgba(242, 201, 76, 0.1);
-  font-size: 1.05rem;
-}
-
 .product-title-row {
   display: flex;
   align-items: center;
