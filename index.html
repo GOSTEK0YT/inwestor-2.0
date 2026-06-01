@@ -6,7 +6,7 @@
     <title>Inwestor 2.0</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
-    <link rel="stylesheet" href="styles.css?v=shop-7">
+    <link rel="stylesheet" href="styles.css?v=market-1">
   </head>
   <body>
     <main class="shell">
@@ -39,8 +39,8 @@
         </header>
 
         <nav class="tabs" aria-label="Sekcje gry">
-          <button class="tab is-active" type="button" data-panel="casinoPanel">Kasyno</button>
-          <button class="tab" type="button" data-panel="marketPanel">Giełda</button>
+          <button class="tab" type="button" data-panel="casinoPanel">Kasyno</button>
+          <button class="tab is-active" type="button" data-panel="marketPanel">Giełda</button>
           <button class="tab" type="button" data-panel="miningPanel">Koparki</button>
           <button class="tab" type="button" data-panel="bankPanel">Bank</button>
           <button class="tab" type="button" data-panel="shopPanel">Sklep</button>
@@ -48,7 +48,7 @@
           <button class="tab" type="button" data-panel="realEstatePanel">Nieruchomości</button>
         </nav>
 
-        <section id="casinoPanel" class="panel is-active">
+        <section id="casinoPanel" class="panel">
           <div class="casino-grid">
             <article class="casino-machine">
               <div class="machine-header">
@@ -113,7 +113,7 @@
           </div>
         </section>
 
-        <section id="marketPanel" class="panel">
+        <section id="marketPanel" class="panel is-active">
           <div class="market-grid">
             <article class="market-card wide">
               <div class="machine-header">
@@ -137,7 +137,10 @@
                 <button id="buyBtn" type="button">Kup</button>
                 <button id="sellBtn" type="button" class="secondary">Sprzedaj</button>
               </div>
-              <button id="buyMaxBtn" type="button" class="full secondary">Kup max</button>
+              <div class="dual-actions">
+                <button id="buyMaxBtn" type="button" class="full secondary">Kup max</button>
+                <button id="sellMaxBtn" type="button" class="full secondary">Sprzedaj max</button>
+              </div>
             </article>
 
             <aside class="market-card">
@@ -351,6 +354,6 @@
         </div>
       </section>
     </div>
-    <script src="script.js?v=shop-7"></script>
+    <script src="script.js?v=market-1"></script>
   </body>
 </html>

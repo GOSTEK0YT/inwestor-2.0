@@ -994,6 +994,17 @@ function buyMax() {
   buyCoin(amount);
 }
 
+function sellMax() {
+  const coin = activeCoin();
+  const amount = Math.floor(coin.holding * 1000000) / 1000000;
+  if (amount <= 0) {
+    showToast(`Nie masz ${state.activeCoin} do sprzedaży.`);
+    return;
+  }
+  els.coinAmount.value = amount.toFixed(6);
+  sellCoin();
+}
+
 function minerPurchaseCost() {
   return 100 * 2 ** state.miners.length;
 }
@@ -1126,6 +1137,7 @@ $("#tickPriceBtn").addEventListener("click", tickPrices);
 $("#buyBtn").addEventListener("click", () => buyCoin());
 $("#sellBtn").addEventListener("click", sellCoin);
 $("#buyMaxBtn").addEventListener("click", buyMax);
+$("#sellMaxBtn").addEventListener("click", sellMax);
 $("#depositActionBtn").addEventListener("click", handleDepositAction);
 els.depositAmount.addEventListener("input", updateDepositOffer);
 els.depositDuration.addEventListener("change", updateDepositOffer);

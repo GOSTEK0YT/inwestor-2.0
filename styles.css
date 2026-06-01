@@ -80,6 +80,12 @@ button.full {
   margin-top: 0.85rem;
 }
 
+.dual-actions {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 0.7rem;
+}
+
 input,
 select {
   width: 100%;
@@ -1510,6 +1516,10 @@ canvas {
 
   .controls {
     display: grid;
+  }
+
+  .dual-actions {
+    grid-template-columns: 1fr;
   }
 
   .slot-reels {
