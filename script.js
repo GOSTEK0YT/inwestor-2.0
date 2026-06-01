@@ -31,6 +31,7 @@ const ROULETTE_LABELS = {
   black: "Czarny",
   green: "Zielony"
 };
+const ADMIN_CODE = "INWESTOR20";
 
 const $ = (selector) => document.querySelector(selector);
 
@@ -58,7 +59,12 @@ const els = {
   priceChart: $("#priceChart"),
   coinHolding: $("#coinHolding"),
   coinAmount: $("#coinAmount"),
-  minersList: $("#minersList")
+  minersList: $("#minersList"),
+  profileOverlay: $("#profileOverlay"),
+  adminCodeInput: $("#adminCodeInput"),
+  adminPanel: $("#adminPanel"),
+  adminMoneyInput: $("#adminMoneyInput"),
+  adminXpInput: $("#adminXpInput")
 };
 
 let lastCash = state.cash;
@@ -162,6 +168,47 @@ function renderLevel() {
   els.playerLevel.textContent = state.level;
   els.xpText.textContent = `${state.xp} / ${next} EXP`;
   els.xpFill.style.width = `${Math.min(100, state.xp / next * 100)}%`;
+}
+
+function openProfile() {
+  els.profileOverlay.hidden = false;
+  els.adminCodeInput.focus();
+}
+
+function closeProfile() {
+  els.profileOverlay.hidden = true;
+}
+
+function unlockAdminPanel() {
+  if (els.adminCodeInput.value.trim().toUpperCase() !== ADMIN_CODE) {
+    showToast("Zły kod admina.");
+    return;
+  }
+
+  els.adminPanel.hidden = false;
+  showToast("Panel admina odblokowany.");
+}
+
+function addAdminMoney() {
+  const amount = Number(els.adminMoneyInput.value);
+  if (!Number.isFinite(amount) || amount <= 0) {
+    showToast("Wpisz poprawną kwotę.");
+    return;
+  }
+
+  state.cash += amount;
+  renderWallet();
+  showToast(`Admin: dodano ${money(amount)} zł.`);
+}
+
+function addAdminXp() {
+  const amount = Math.floor(Number(els.adminXpInput.value));
+  if (!Number.isFinite(amount) || amount <= 0) {
+    showToast("Wpisz poprawny EXP.");
+    return;
+  }
+
+  addXp(amount, "panel admina");
 }
 
 function renderCoins() {
@@ -709,10 +756,19 @@ $("#tickPriceBtn").addEventListener("click", tickPrices);
 $("#buyBtn").addEventListener("click", () => buyCoin());
 $("#sellBtn").addEventListener("click", sellCoin);
 $("#buyMaxBtn").addEventListener("click", buyMax);
-$("#infiniteMoneyBtn").addEventListener("click", () => {
-  state.cash = 999999999;
-  renderWallet();
-  showToast("Tryb testowy: kasa bez limitu.");
+$("#profileBtn").addEventListener("click", openProfile);
+$("#profileCloseBtn").addEventListener("click", closeProfile);
+$("#adminUnlockBtn").addEventListener("click", unlockAdminPanel);
+$("#adminAddMoneyBtn").addEventListener("click", addAdminMoney);
+$("#adminAddXpBtn").addEventListener("click", addAdminXp);
+els.adminCodeInput.addEventListener("keydown", (event) => {
+  if (event.key === "Enter") unlockAdminPanel();
+});
+els.profileOverlay.addEventListener("click", (event) => {
+  if (event.target === els.profileOverlay) closeProfile();
+});
+window.addEventListener("keydown", (event) => {
+  if (event.key === "Escape" && !els.profileOverlay.hidden) closeProfile();
 });
 els.minersList.addEventListener("click", (event) => {
   if (event.target.closest("#toggleMiningBtn")) {

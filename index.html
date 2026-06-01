@@ -6,7 +6,7 @@
     <title>Inwestor 2.0</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
-    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="styles.css?v=profile-admin-1">
   </head>
   <body>
     <main class="shell">
@@ -25,7 +25,7 @@
               <span><strong id="portfolioValue">0.00</strong> zł w krypto</span>
               <span class="cash-card">
                 <strong id="cash">50.00</strong> zł
-                <button id="infiniteMoneyBtn" type="button" class="test-money">∞</button>
+                <button id="profileBtn" type="button" class="profile-button" aria-label="Profil"></button>
               </span>
             </div>
             <div class="level-card">
@@ -186,6 +186,32 @@
     </main>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <script src="script.js"></script>
+    <div id="profileOverlay" class="modal-overlay" hidden>
+      <section class="profile-modal" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
+        <button id="profileCloseBtn" type="button" class="modal-close" aria-label="Zamknij">×</button>
+        <h2 id="profileTitle">Profil</h2>
+        <p class="quiet">Panel testowy jest ukryty za kodem.</p>
+        <label for="adminCodeInput">Kod admina</label>
+        <div class="input-row compact">
+          <input id="adminCodeInput" type="password" autocomplete="off" placeholder="Wpisz kod">
+          <button id="adminUnlockBtn" type="button">Odblokuj</button>
+        </div>
+        <div id="adminPanel" class="admin-panel" hidden>
+          <div class="admin-grid">
+            <label>
+              Dodaj zł
+              <input id="adminMoneyInput" type="number" min="0" step="100" value="1000">
+            </label>
+            <button id="adminAddMoneyBtn" type="button">Dodaj kasę</button>
+            <label>
+              Dodaj EXP
+              <input id="adminXpInput" type="number" min="0" step="10" value="100">
+            </label>
+            <button id="adminAddXpBtn" type="button">Dodaj EXP</button>
+          </div>
+        </div>
+      </section>
+    </div>
+    <script src="script.js?v=profile-admin-1"></script>
   </body>
 </html>

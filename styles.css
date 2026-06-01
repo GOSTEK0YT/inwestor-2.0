@@ -183,7 +183,7 @@ h2 {
   padding-right: 3.1rem;
 }
 
-.test-money {
+.profile-button {
   position: absolute;
   right: 0.55rem;
   top: 50%;
@@ -192,13 +192,33 @@ h2 {
   transform: translateY(-50%);
   padding: 0;
   border-radius: 50%;
-  background: var(--accent-2);
-  color: #071410;
-  font-size: 1.25rem;
-  line-height: 1;
+  background: linear-gradient(160deg, var(--accent), #8debd8);
 }
 
-.test-money:hover {
+.profile-button::before,
+.profile-button::after {
+  content: "";
+  position: absolute;
+  left: 50%;
+  background: #10201e;
+  transform: translateX(-50%);
+}
+
+.profile-button::before {
+  top: 7px;
+  width: 9px;
+  height: 9px;
+  border-radius: 50%;
+}
+
+.profile-button::after {
+  bottom: 7px;
+  width: 17px;
+  height: 10px;
+  border-radius: 999px 999px 6px 6px;
+}
+
+.profile-button:hover {
   transform: translateY(-50%) scale(1.06);
 }
 
@@ -1036,6 +1056,62 @@ canvas {
   transform: translate(-50%, 0);
 }
 
+.modal-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 30;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(5, 8, 11, 0.72);
+  backdrop-filter: blur(8px);
+}
+
+.modal-overlay[hidden] {
+  display: none;
+}
+
+.profile-modal {
+  position: relative;
+  width: min(440px, 100%);
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 22px;
+  background: #1a2027;
+  box-shadow: 0 24px 80px rgba(0, 0, 0, 0.48);
+}
+
+.profile-modal h2 {
+  margin-top: 0;
+}
+
+.modal-close {
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  width: 34px;
+  height: 34px;
+  padding: 0;
+}
+
+.admin-panel {
+  margin-top: 1rem;
+  padding-top: 1rem;
+  border-top: 1px solid var(--line);
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 0.75rem;
+  align-items: end;
+}
+
+.admin-grid label {
+  display: grid;
+  gap: 0.35rem;
+}
+
 @media (prefers-reduced-motion: reduce) {
   *,
   *::before,
@@ -1087,6 +1163,67 @@ canvas {
     padding-right: 14px;
   }
 
+  .topbar {
+    gap: 0.75rem;
+    padding-top: 16px;
+    padding-bottom: 14px;
+  }
+
+  h1 {
+    font-size: clamp(3.2rem, 19vw, 5.4rem);
+    line-height: 0.88;
+  }
+
+  .hud {
+    gap: 0.4rem;
+  }
+
+  .wallet {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .wallet .ticker-card {
+    grid-column: 1 / -1;
+  }
+
+  .wallet span,
+  .level-card {
+    padding: 0.5rem;
+  }
+
+  .cash-card {
+    padding-right: 2.85rem;
+  }
+
+  .profile-button {
+    width: 31px;
+    height: 31px;
+  }
+
+  .tabs {
+    gap: 0.4rem;
+    padding-top: 10px;
+    padding-bottom: 10px;
+    scroll-snap-type: x proximity;
+  }
+
+  .tab {
+    flex: 0 0 auto;
+    min-height: 46px;
+    scroll-snap-align: start;
+  }
+
+  .panel {
+    padding-top: 18px;
+    padding-bottom: 18px;
+  }
+
+  .casino-machine,
+  .market-card,
+  .printer-card {
+    padding: 14px;
+  }
+
   .machine-header,
   .roulette-wrap,
   .input-row,
@@ -1107,5 +1244,22 @@ canvas {
 
   .slot-reels {
     grid-template-columns: repeat(3, minmax(0, 1fr));
+  }
+
+  .panel-card-header {
+    display: grid;
+    justify-items: start;
+  }
+
+  .real-estate-card .panel-card-header {
+    left: 14px;
+  }
+
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .profile-modal {
+    padding: 18px;
   }
 }
