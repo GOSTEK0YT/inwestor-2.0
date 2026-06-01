@@ -20,9 +20,14 @@ const state = {
   miners: [{ id: 1, faster: 0, bigger: 0, lastReward: 0, nextAt: 0 }],
   nextMinerId: 2,
   miningTimer: null,
+  deposit: null,
+  loanDebt: 0,
 };
 
 const SLOT_COST = 5;
+const DEPOSIT_DURATION = 600000;
+const DEPOSIT_RATE = 0.05;
+const LOAN_RATE = 0.15;
 const SLOT_SYMBOLS = ["7", "★", "◆", "●", "L"];
 const ROULETTE_GREEN_SIZE = 9.73;
 const ROULETTE_COLOR_SIZE = (360 - ROULETTE_GREEN_SIZE) / 18;
@@ -66,7 +71,16 @@ const els = {
   adminEasterEgg: $("#adminEasterEgg"),
   adminPanel: $("#adminPanel"),
   adminMoneyInput: $("#adminMoneyInput"),
-  adminXpInput: $("#adminXpInput")
+  adminXpInput: $("#adminXpInput"),
+  depositAmount: $("#depositAmount"),
+  depositStatus: $("#depositStatus"),
+  depositPayout: $("#depositPayout"),
+  depositProgress: $("#depositProgress"),
+  claimDepositBtn: $("#claimDepositBtn"),
+  loanAmount: $("#loanAmount"),
+  loanDebt: $("#loanDebt"),
+  loanStatus: $("#loanStatus"),
+  repayLoanBtn: $("#repayLoanBtn")
 };
 
 let lastCash = state.cash;
@@ -75,6 +89,13 @@ let lastPortfolio = portfolioValue();
 function money(value) {
   if (value >= 1000) return value.toLocaleString("pl-PL", { maximumFractionDigits: 2 });
   return value.toFixed(2);
+}
+
+function formatTime(ms) {
+  const totalSeconds = Math.max(0, Math.ceil(ms / 1000));
+  const minutes = Math.floor(totalSeconds / 60);
+  const seconds = String(totalSeconds % 60).padStart(2, "0");
+  return `${minutes}:${seconds}`;
 }
 
 function portfolioValue() {
@@ -221,6 +242,106 @@ function addAdminXp() {
   }
 
   addXp(amount, "panel admina");
+}
+
+function depositPayout(deposit) {
+  return deposit.amount * (1 + DEPOSIT_RATE);
+}
+
+function renderBank() {
+  const now = Date.now();
+  if (state.deposit) {
+    const elapsed = Math.min(DEPOSIT_DURATION, now - state.deposit.startedAt);
+    const progress = elapsed / DEPOSIT_DURATION;
+    const timeLeft = DEPOSIT_DURATION - elapsed;
+    const ready = progress >= 1;
+
+    els.depositStatus.textContent = ready ? "Gotowa do odbioru" : `${formatTime(timeLeft)} do końca`;
+    els.depositPayout.textContent = `${money(depositPayout(state.deposit))} zł`;
+    els.depositProgress.style.width = `${progress * 100}%`;
+    els.claimDepositBtn.disabled = !ready;
+  } else {
+    els.depositStatus.textContent = "Brak lokaty";
+    els.depositPayout.textContent = "0.00 zł";
+    els.depositProgress.style.width = "0%";
+    els.claimDepositBtn.disabled = true;
+  }
+
+  els.loanDebt.textContent = `${money(state.loanDebt)} zł`;
+  els.loanStatus.textContent = state.loanDebt > 0 ? "Aktywna" : "Brak pożyczki";
+  els.repayLoanBtn.disabled = state.loanDebt <= 0;
+}
+
+function startDeposit() {
+  if (state.deposit) {
+    showToast("Masz już aktywną lokatę.");
+    return;
+  }
+
+  const amount = Number(els.depositAmount.value);
+  if (!Number.isFinite(amount) || amount < 10) {
+    showToast("Minimalna lokata to 10 zł.");
+    return;
+  }
+
+  if (amount > state.cash) {
+    showToast("Nie masz tyle złotówek na lokatę.");
+    return;
+  }
+
+  state.cash -= amount;
+  state.deposit = { amount, startedAt: Date.now() };
+  addXp(4, "założenie lokaty");
+  showToast(`Lokata założona: ${money(amount)} zł.`);
+  renderAll();
+}
+
+function claimDeposit() {
+  if (!state.deposit) return;
+  if (Date.now() - state.deposit.startedAt < DEPOSIT_DURATION) {
+    showToast("Lokata jeszcze pracuje.");
+    return;
+  }
+
+  const payout = depositPayout(state.deposit);
+  state.cash += payout;
+  state.deposit = null;
+  addXp(12, "odbiór lokaty");
+  showToast(`Lokata wypłacona: ${money(payout)} zł.`);
+  renderAll();
+}
+
+function takeLoan() {
+  if (state.loanDebt > 0) {
+    showToast("Najpierw spłać obecną pożyczkę.");
+    return;
+  }
+
+  const amount = Number(els.loanAmount.value);
+  if (!Number.isFinite(amount) || amount < 50) {
+    showToast("Minimalna pożyczka to 50 zł.");
+    return;
+  }
+
+  state.cash += amount;
+  state.loanDebt = Math.ceil(amount * (1 + LOAN_RATE) * 100) / 100;
+  addXp(2, "pożyczka z banku");
+  showToast(`Pożyczono ${money(amount)} zł. Do spłaty ${money(state.loanDebt)} zł.`);
+  renderAll();
+}
+
+function repayLoan() {
+  if (state.loanDebt <= 0) return;
+  if (state.cash < state.loanDebt) {
+    showToast("Nie masz tyle złotówek na spłatę.");
+    return;
+  }
+
+  state.cash -= state.loanDebt;
+  state.loanDebt = 0;
+  addXp(10, "spłata pożyczki");
+  showToast("Pożyczka spłacona.");
+  renderAll();
 }
 
 function renderCoins() {
@@ -384,6 +505,7 @@ function renderAll() {
   renderCoins();
   renderHoldings();
   renderMining();
+  renderBank();
   drawChart();
 }
 
@@ -768,6 +890,10 @@ $("#tickPriceBtn").addEventListener("click", tickPrices);
 $("#buyBtn").addEventListener("click", () => buyCoin());
 $("#sellBtn").addEventListener("click", sellCoin);
 $("#buyMaxBtn").addEventListener("click", buyMax);
+$("#startDepositBtn").addEventListener("click", startDeposit);
+$("#claimDepositBtn").addEventListener("click", claimDeposit);
+$("#takeLoanBtn").addEventListener("click", takeLoan);
+$("#repayLoanBtn").addEventListener("click", repayLoan);
 $("#profileBtn").addEventListener("click", openProfile);
 $("#profileCloseBtn").addEventListener("click", closeProfile);
 $("#adminUnlockBtn").addEventListener("click", unlockAdminPanel);
@@ -805,6 +931,7 @@ els.minersList.addEventListener("change", (event) => {
 window.addEventListener("resize", updateRouletteRadius);
 
 window.setInterval(tickPrices, 1000);
+window.setInterval(renderBank, 1000);
 updateRouletteRadius();
 renderSlots();
 renderAll();

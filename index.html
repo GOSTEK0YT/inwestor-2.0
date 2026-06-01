@@ -6,7 +6,7 @@
     <title>Inwestor 2.0</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
-    <link rel="stylesheet" href="styles.css?v=profile-admin-3">
+    <link rel="stylesheet" href="styles.css?v=bank-1">
   </head>
   <body>
     <main class="shell">
@@ -152,10 +152,62 @@
         </section>
 
         <section id="bankPanel" class="panel">
-          <article class="market-card placeholder-panel">
-            <h2>Bank</h2>
-            <p class="quiet">Tutaj później dodamy lokaty, wpłaty, wypłaty i odsetki.</p>
-          </article>
+          <div class="bank-grid">
+            <article class="market-card bank-card deposit-card">
+              <div class="machine-header">
+                <div>
+                  <h2>Lokata</h2>
+                  <p class="quiet">Zablokuj złotówki na minimum 10 minut i odbierz je z zyskiem.</p>
+                </div>
+                <span class="bank-rate">+5%</span>
+              </div>
+              <label for="depositAmount">Kwota lokaty</label>
+              <div class="input-row">
+                <input id="depositAmount" type="number" min="10" step="10" value="100">
+                <button id="startDepositBtn" type="button">Załóż lokatę</button>
+              </div>
+              <div class="bank-status">
+                <div>
+                  <span>Status</span>
+                  <strong id="depositStatus">Brak lokaty</strong>
+                </div>
+                <div>
+                  <span>Do odbioru</span>
+                  <strong id="depositPayout">0.00 zł</strong>
+                </div>
+              </div>
+              <div class="bank-progress" aria-label="Postęp lokaty">
+                <span id="depositProgress"></span>
+              </div>
+              <button id="claimDepositBtn" type="button" class="full secondary">Odbierz lokatę</button>
+            </article>
+
+            <article class="market-card bank-card loan-card">
+              <div class="machine-header">
+                <div>
+                  <h2>Pożyczka</h2>
+                  <p class="quiet">Pożycz gotówkę szybko, ale oddajesz ją z prowizją.</p>
+                </div>
+                <span class="bank-rate danger">+15%</span>
+              </div>
+              <label for="loanAmount">Kwota pożyczki</label>
+              <div class="input-row">
+                <input id="loanAmount" type="number" min="50" step="50" value="500">
+                <button id="takeLoanBtn" type="button">Weź pożyczkę</button>
+              </div>
+              <div class="bank-status">
+                <div>
+                  <span>Dług</span>
+                  <strong id="loanDebt">0.00 zł</strong>
+                </div>
+                <div>
+                  <span>Do spłaty</span>
+                  <strong id="loanStatus">Brak pożyczki</strong>
+                </div>
+              </div>
+              <button id="repayLoanBtn" type="button" class="full secondary">Spłać pożyczkę</button>
+            </article>
+          </div>
         </section>
 
         <section id="shopPanel" class="panel">
@@ -217,6 +269,6 @@
         </div>
       </section>
     </div>
-    <script src="script.js?v=profile-admin-3"></script>
+    <script src="script.js?v=bank-1"></script>
   </body>
 </html>
