@@ -6,7 +6,7 @@
     <title>Inwestor 2.0</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
-    <link rel="stylesheet" href="styles.css?v=bank-2">
+    <link rel="stylesheet" href="styles.css?v=bank-3">
   </head>
   <body>
     <main class="shell">
@@ -164,7 +164,7 @@
               <label for="depositAmount">Kwota lokaty</label>
               <div class="input-row">
                 <input id="depositAmount" type="number" min="10" step="10" value="100">
-                <button id="startDepositBtn" type="button">Złóż lokatę</button>
+                <button id="startDepositBtn" type="button">Załóż lokatę</button>
               </div>
               <div class="bank-status">
                 <div>
@@ -179,6 +179,7 @@
               <div id="depositProgressWrap" class="bank-progress" aria-label="Postęp lokaty" hidden>
                 <span id="depositProgress"></span>
               </div>
+              <button id="claimDepositBtn" type="button" class="full secondary">Odbierz pieniądze</button>
             </article>
 
             <article class="market-card bank-card loan-card">
@@ -272,6 +273,6 @@
         </div>
       </section>
     </div>
-    <script src="script.js?v=bank-2"></script>
+    <script src="script.js?v=bank-3"></script>
   </body>
 </html>

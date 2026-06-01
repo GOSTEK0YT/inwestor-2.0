@@ -78,6 +78,7 @@ const els = {
   depositProgressWrap: $("#depositProgressWrap"),
   depositProgress: $("#depositProgress"),
   startDepositBtn: $("#startDepositBtn"),
+  claimDepositBtn: $("#claimDepositBtn"),
   loanAmount: $("#loanAmount"),
   takeLoanBtn: $("#takeLoanBtn"),
   creditLimit: $("#creditLimit"),
@@ -267,16 +268,16 @@ function renderBank() {
     els.depositPayout.textContent = `${money(depositPayout(state.deposit))} zł`;
     els.depositProgressWrap.hidden = false;
     els.depositProgress.style.width = `${progress * 100}%`;
-    els.startDepositBtn.textContent = "Odbierz pieniądze";
-    els.startDepositBtn.disabled = !ready;
+    els.startDepositBtn.disabled = true;
+    els.claimDepositBtn.disabled = !ready;
     els.depositAmount.disabled = true;
   } else {
     els.depositStatus.textContent = "Brak lokaty";
     els.depositPayout.textContent = "0.00 zł";
     els.depositProgressWrap.hidden = true;
     els.depositProgress.style.width = "0%";
-    els.startDepositBtn.textContent = "Złóż lokatę";
     els.startDepositBtn.disabled = false;
+    els.claimDepositBtn.disabled = true;
     els.depositAmount.disabled = false;
   }
 
@@ -290,11 +291,6 @@ function renderBank() {
 }
 
 function startDeposit() {
-  if (state.deposit) {
-    claimDeposit();
-    return;
-  }
-
   const amount = Number(els.depositAmount.value);
   if (!Number.isFinite(amount) || amount < 10) {
     showToast("Minimalna lokata to 10 zł.");
@@ -912,6 +908,7 @@ $("#buyBtn").addEventListener("click", () => buyCoin());
 $("#sellBtn").addEventListener("click", sellCoin);
 $("#buyMaxBtn").addEventListener("click", buyMax);
 $("#startDepositBtn").addEventListener("click", startDeposit);
+$("#claimDepositBtn").addEventListener("click", claimDeposit);
 $("#takeLoanBtn").addEventListener("click", takeLoan);
 $("#repayLoanBtn").addEventListener("click", repayLoan);
 $("#profileBtn").addEventListener("click", openProfile);
