@@ -75,9 +75,12 @@ const els = {
   depositAmount: $("#depositAmount"),
   depositStatus: $("#depositStatus"),
   depositPayout: $("#depositPayout"),
+  depositProgressWrap: $("#depositProgressWrap"),
   depositProgress: $("#depositProgress"),
-  claimDepositBtn: $("#claimDepositBtn"),
+  startDepositBtn: $("#startDepositBtn"),
   loanAmount: $("#loanAmount"),
+  takeLoanBtn: $("#takeLoanBtn"),
+  creditLimit: $("#creditLimit"),
   loanDebt: $("#loanDebt"),
   loanStatus: $("#loanStatus"),
   repayLoanBtn: $("#repayLoanBtn")
@@ -248,6 +251,10 @@ function depositPayout(deposit) {
   return deposit.amount * (1 + DEPOSIT_RATE);
 }
 
+function creditLimit() {
+  return 500 + (state.level - 1) * 250;
+}
+
 function renderBank() {
   const now = Date.now();
   if (state.deposit) {
@@ -258,23 +265,33 @@ function renderBank() {
 
     els.depositStatus.textContent = ready ? "Gotowa do odbioru" : `${formatTime(timeLeft)} do końca`;
     els.depositPayout.textContent = `${money(depositPayout(state.deposit))} zł`;
+    els.depositProgressWrap.hidden = false;
     els.depositProgress.style.width = `${progress * 100}%`;
-    els.claimDepositBtn.disabled = !ready;
+    els.startDepositBtn.textContent = "Odbierz pieniądze";
+    els.startDepositBtn.disabled = !ready;
+    els.depositAmount.disabled = true;
   } else {
     els.depositStatus.textContent = "Brak lokaty";
     els.depositPayout.textContent = "0.00 zł";
+    els.depositProgressWrap.hidden = true;
     els.depositProgress.style.width = "0%";
-    els.claimDepositBtn.disabled = true;
+    els.startDepositBtn.textContent = "Złóż lokatę";
+    els.startDepositBtn.disabled = false;
+    els.depositAmount.disabled = false;
   }
 
+  const limit = creditLimit();
+  els.creditLimit.textContent = `${money(limit)} zł`;
+  els.loanAmount.max = limit;
   els.loanDebt.textContent = `${money(state.loanDebt)} zł`;
   els.loanStatus.textContent = state.loanDebt > 0 ? "Aktywna" : "Brak pożyczki";
+  els.takeLoanBtn.disabled = state.loanDebt > 0;
   els.repayLoanBtn.disabled = state.loanDebt <= 0;
 }
 
 function startDeposit() {
   if (state.deposit) {
-    showToast("Masz już aktywną lokatę.");
+    claimDeposit();
     return;
   }
 
@@ -320,6 +337,10 @@ function takeLoan() {
   const amount = Number(els.loanAmount.value);
   if (!Number.isFinite(amount) || amount < 50) {
     showToast("Minimalna pożyczka to 50 zł.");
+    return;
+  }
+  if (amount > creditLimit()) {
+    showToast(`Twoja zdolność kredytowa to ${money(creditLimit())} zł.`);
     return;
   }
 
@@ -891,7 +912,6 @@ $("#buyBtn").addEventListener("click", () => buyCoin());
 $("#sellBtn").addEventListener("click", sellCoin);
 $("#buyMaxBtn").addEventListener("click", buyMax);
 $("#startDepositBtn").addEventListener("click", startDeposit);
-$("#claimDepositBtn").addEventListener("click", claimDeposit);
 $("#takeLoanBtn").addEventListener("click", takeLoan);
 $("#repayLoanBtn").addEventListener("click", repayLoan);
 $("#profileBtn").addEventListener("click", openProfile);

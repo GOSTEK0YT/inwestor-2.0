@@ -6,7 +6,7 @@
     <title>Inwestor 2.0</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
-    <link rel="stylesheet" href="styles.css?v=bank-1">
+    <link rel="stylesheet" href="styles.css?v=bank-2">
   </head>
   <body>
     <main class="shell">
@@ -164,7 +164,7 @@
               <label for="depositAmount">Kwota lokaty</label>
               <div class="input-row">
                 <input id="depositAmount" type="number" min="10" step="10" value="100">
-                <button id="startDepositBtn" type="button">Załóż lokatę</button>
+                <button id="startDepositBtn" type="button">Złóż lokatę</button>
               </div>
               <div class="bank-status">
                 <div>
@@ -176,17 +176,16 @@
                   <strong id="depositPayout">0.00 zł</strong>
                 </div>
               </div>
-              <div class="bank-progress" aria-label="Postęp lokaty">
+              <div id="depositProgressWrap" class="bank-progress" aria-label="Postęp lokaty" hidden>
                 <span id="depositProgress"></span>
               </div>
-              <button id="claimDepositBtn" type="button" class="full secondary">Odbierz lokatę</button>
             </article>
 
             <article class="market-card bank-card loan-card">
               <div class="machine-header">
                 <div>
                   <h2>Pożyczka</h2>
-                  <p class="quiet">Pożycz gotówkę szybko, ale oddajesz ją z prowizją.</p>
+                  <p class="quiet">Pożycz gotówkę szybko i nie przejmuj się drobnym druczkiem.</p>
                 </div>
                 <span class="bank-rate danger">+15%</span>
               </div>
@@ -196,6 +195,10 @@
                 <button id="takeLoanBtn" type="button">Weź pożyczkę</button>
               </div>
               <div class="bank-status">
+                <div>
+                  <span>Zdolność kredytowa</span>
+                  <strong id="creditLimit">500.00 zł</strong>
+                </div>
                 <div>
                   <span>Dług</span>
                   <strong id="loanDebt">0.00 zł</strong>
@@ -269,6 +272,6 @@
         </div>
       </section>
     </div>
-    <script src="script.js?v=bank-1"></script>
+    <script src="script.js?v=bank-2"></script>
   </body>
 </html>
