@@ -58,6 +58,7 @@ const ADMIN_CODE = "codex";
 const EASTER_EGG_CODE = "67";
 const USERS_KEY = "inwestor2Users";
 const ACTIVE_USER_KEY = "inwestor2ActiveUser";
+const AUTH_TOKEN_KEY = "inwestor2AuthToken";
 const SAVE_PREFIX = "inwestor2Save:";
 const SAVE_VERSION = 1;
 
@@ -154,6 +155,7 @@ let lastCash = state.cash;
 let lastPortfolio = portfolioValue();
 let profilePointerStartedOnOverlay = false;
 let activeUser = null;
+let activeToken = window.localStorage.getItem(AUTH_TOKEN_KEY);
 let saveReady = false;
 
 function money(value) {
@@ -209,6 +211,27 @@ function storageSet(key, value) {
   }
 }
 
+async function apiRequest(path, options = {}) {
+  const headers = {
+    "Content-Type": "application/json",
+    ...(options.headers || {})
+  };
+
+  if (activeToken) headers.Authorization = activeToken;
+
+  const response = await fetch(path, {
+    ...options,
+    headers
+  });
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || "Serwer nie odpowiedzial poprawnie.");
+  }
+
+  return data;
+}
+
 function hashText(text) {
   let hash = 2166136261;
   for (let index = 0; index < text.length; index += 1) {
@@ -259,6 +282,15 @@ function setCurrentUser(login) {
   updateAuthUi();
 }
 
+function setAuthToken(token) {
+  activeToken = token;
+  if (token) {
+    window.localStorage.setItem(AUTH_TOKEN_KEY, token);
+  } else {
+    window.localStorage.removeItem(AUTH_TOKEN_KEY);
+  }
+}
+
 function resetGameState() {
   window.clearTimeout(state.miningTimer);
   state.slotTimers.forEach((timer) => window.clearInterval(timer));
@@ -281,10 +313,8 @@ function saveKey(login = activeUser) {
   return `${SAVE_PREFIX}${login}`;
 }
 
-function saveGame() {
-  if (!activeUser || !saveReady) return;
-
-  storageSet(saveKey(), {
+function buildSavePayload() {
+  return {
     version: SAVE_VERSION,
     savedAt: Date.now(),
     state: {
@@ -305,12 +335,26 @@ function saveGame() {
       miningBoostUntil: state.miningBoostUntil
     },
     coins
-  });
+  };
 }
 
-function loadGame(login) {
+function saveGame() {
+  if (!activeUser || !saveReady) return;
+
+  const save = buildSavePayload();
+  storageSet(saveKey(), save);
+
+  if (activeToken) {
+    apiRequest("/api/save", {
+      method: "PUT",
+      body: JSON.stringify({ save })
+    }).catch(() => {});
+  }
+}
+
+function loadGame(login, remoteSave = null) {
   resetGameState();
-  const save = storageGet(saveKey(login), null);
+  const save = remoteSave || storageGet(saveKey(login), null);
 
   if (save?.coins) {
     Object.entries(save.coins).forEach(([symbol, coin]) => {
@@ -348,10 +392,30 @@ function hideAuth() {
   els.authOverlay.hidden = true;
 }
 
-function loginUser() {
+async function loginUser() {
   const login = normalizedLogin();
   const password = els.passwordInput.value;
   const users = usersStore();
+
+  if (login && password) {
+    try {
+      setAuthMessage("Logowanie...");
+      const data = await apiRequest("/api/login", {
+        method: "POST",
+        body: JSON.stringify({ login, password })
+      });
+      setAuthToken(data.token);
+      setCurrentUser(data.user.login);
+      loadGame(data.user.login, data.save);
+      hideAuth();
+      renderSlots();
+      renderAll();
+      showToast(`Witaj, ${login}.`);
+      return;
+    } catch (error) {
+      setAuthMessage(error.message || "Nie udalo sie polaczyc z serwerem.");
+    }
+  }
 
   if (!login || !password) {
     setAuthMessage("Wpisz login i hasło.");
@@ -363,6 +427,7 @@ function loginUser() {
     return;
   }
 
+  setAuthToken(null);
   setCurrentUser(login);
   loadGame(login);
   hideAuth();
@@ -371,10 +436,35 @@ function loginUser() {
   showToast(`Witaj, ${login}.`);
 }
 
-function registerUser() {
+async function registerUser() {
   const login = normalizedLogin();
   const password = els.passwordInput.value;
   const users = usersStore();
+
+  if (login.length >= 3 && password.length >= 3) {
+    try {
+      setAuthMessage("Tworzenie konta...");
+      const data = await apiRequest("/api/register", {
+        method: "POST",
+        body: JSON.stringify({ login, password })
+      });
+      setAuthToken(data.token);
+      setCurrentUser(data.user.login);
+      saveReady = true;
+      saveGame();
+      hideAuth();
+      renderSlots();
+      renderAll();
+      showToast(`Utworzono konto ${login}.`);
+      return;
+    } catch (error) {
+      if ((error.message || "").includes("istnieje")) {
+        setAuthMessage(error.message);
+        return;
+      }
+      setAuthMessage(error.message || "Nie udalo sie polaczyc z serwerem.");
+    }
+  }
 
   if (login.length < 3) {
     setAuthMessage("Login musi mieć minimum 3 znaki.");
@@ -396,6 +486,7 @@ function registerUser() {
     createdAt: Date.now()
   };
   storageSet(USERS_KEY, users);
+  setAuthToken(null);
   setCurrentUser(login);
   saveReady = true;
   saveGame();
@@ -407,6 +498,10 @@ function registerUser() {
 
 function logoutUser() {
   saveGame();
+  if (activeToken) {
+    apiRequest("/api/logout", { method: "POST" }).catch(() => {});
+  }
+  setAuthToken(null);
   setCurrentUser(null);
   saveReady = false;
   closeProfile();
@@ -419,13 +514,16 @@ function resetProgress() {
 
   resetGameState();
   saveReady = Boolean(activeUser);
+  if (activeToken) {
+    apiRequest("/api/reset", { method: "POST" }).catch(() => {});
+  }
   renderSlots();
   renderAll();
   closeProfile();
   showToast(activeUser ? "Postęp konta zresetowany." : "Postęp gościa zresetowany.");
 }
 
-function deleteAccount() {
+async function deleteAccount() {
   if (!activeUser) return;
 
   const login = activeUser;
@@ -436,15 +534,38 @@ function deleteAccount() {
   delete users[login];
   storageSet(USERS_KEY, users);
   window.localStorage.removeItem(saveKey(login));
+  if (activeToken) {
+    try {
+      await apiRequest("/api/account", { method: "DELETE" });
+    } catch (error) {
+      showToast(error.message);
+      return;
+    }
+  }
+  setAuthToken(null);
   setCurrentUser(null);
   saveReady = false;
   closeProfile();
   showToast("Konto i zapis zostały usunięte.");
 }
 
-function initAuth() {
+async function initAuth() {
   const users = usersStore();
   const login = window.localStorage.getItem(ACTIVE_USER_KEY);
+  if (activeToken) {
+    try {
+      const data = await apiRequest("/api/me");
+      setCurrentUser(data.user.login);
+      loadGame(data.user.login, data.save);
+      hideAuth();
+      renderSlots();
+      renderAll();
+      return;
+    } catch {
+      setAuthToken(null);
+    }
+  }
+
   if (login && users[login]) {
     setCurrentUser(login);
     loadGame(login);

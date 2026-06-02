@@ -1,11 +1,7 @@
 services:
   - type: web
     name: inwestor-2
-    runtime: static
+    runtime: node
     plan: free
     buildCommand: ""
-    staticPublishPath: .
-    routes:
-      - type: rewrite
-        source: /*
-        destination: /index.html
+    startCommand: npm start
