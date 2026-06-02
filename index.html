@@ -6,7 +6,7 @@
     <title>Inwestor 2.0</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
-    <link rel="stylesheet" href="styles.css?v=save-1">
+    <link rel="stylesheet" href="styles.css?v=save-2">
   </head>
   <body>
     <main class="shell">
@@ -318,10 +318,11 @@
     </main>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
-    <div id="authOverlay" class="modal-overlay auth-overlay">
+    <div id="authOverlay" class="modal-overlay auth-overlay" hidden>
       <section class="profile-modal auth-modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+        <button id="authCloseBtn" type="button" class="modal-close" aria-label="Zamknij">×</button>
         <h2 id="authTitle">Logowanie</h2>
-        <p class="quiet">Zaloguj się albo utwórz konto, żeby gra zapisywała postęp.</p>
+        <p class="quiet">Możesz grać jako gość. Konto jest potrzebne dopiero wtedy, gdy chcesz zapisać postęp.</p>
         <label for="loginInput">Login</label>
         <input id="loginInput" type="text" autocomplete="username" placeholder="Nazwa gracza">
         <label for="passwordInput">Hasło</label>
@@ -337,7 +338,9 @@
       <section class="profile-modal" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
         <button id="profileCloseBtn" type="button" class="modal-close" aria-label="Zamknij">×</button>
         <h2 id="profileTitle">Profil</h2>
-        <p class="quiet">Zalogowano jako <strong id="currentUserLabel">-</strong>.</p>
+        <p class="quiet" id="profileSaveStatus">Grasz jako gość. Zaloguj się, żeby zapisać postęp.</p>
+        <p class="quiet">Konto: <strong id="currentUserLabel">gość</strong></p>
+        <button id="openAuthBtn" type="button" class="full">Zaloguj / zapisz grę</button>
         <button id="logoutBtn" type="button" class="full secondary">Wyloguj</button>
         <label for="adminCodeInput">Miejsce na kod</label>
         <div class="input-row compact">
@@ -371,6 +374,6 @@
         </div>
       </section>
     </div>
-    <script src="script.js?v=save-1"></script>
+    <script src="script.js?v=save-2"></script>
   </body>
 </html>

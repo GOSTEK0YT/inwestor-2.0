@@ -98,14 +98,18 @@ const els = {
   coinAmount: $("#coinAmount"),
   minersList: $("#minersList"),
   profileOverlay: $("#profileOverlay"),
-  profileModal: $(".profile-modal"),
+  profileModal: $("#profileOverlay .profile-modal"),
   authOverlay: $("#authOverlay"),
+  authModal: $("#authOverlay .profile-modal"),
+  authCloseBtn: $("#authCloseBtn"),
   loginInput: $("#loginInput"),
   passwordInput: $("#passwordInput"),
   loginBtn: $("#loginBtn"),
   registerBtn: $("#registerBtn"),
   authMessage: $("#authMessage"),
+  profileSaveStatus: $("#profileSaveStatus"),
   currentUserLabel: $("#currentUserLabel"),
+  openAuthBtn: $("#openAuthBtn"),
   logoutBtn: $("#logoutBtn"),
   adminCodeInput: $("#adminCodeInput"),
   adminEasterEgg: $("#adminEasterEgg"),
@@ -223,14 +227,29 @@ function setAuthMessage(message) {
   els.authMessage.textContent = message;
 }
 
+function updateAuthUi() {
+  if (activeUser) {
+    els.currentUserLabel.textContent = activeUser;
+    els.profileSaveStatus.textContent = "Postęp zapisuje się automatycznie na tym koncie.";
+    els.openAuthBtn.hidden = true;
+    els.logoutBtn.hidden = false;
+    return;
+  }
+
+  els.currentUserLabel.textContent = "gość";
+  els.profileSaveStatus.textContent = "Grasz jako gość. Zaloguj się, żeby zapisać postęp.";
+  els.openAuthBtn.hidden = false;
+  els.logoutBtn.hidden = true;
+}
+
 function setCurrentUser(login) {
   activeUser = login;
-  els.currentUserLabel.textContent = login || "-";
   if (login) {
     window.localStorage.setItem(ACTIVE_USER_KEY, login);
   } else {
     window.localStorage.removeItem(ACTIVE_USER_KEY);
   }
+  updateAuthUi();
 }
 
 function resetGameState() {
@@ -314,6 +333,7 @@ function loadGame(login) {
 
 function showAuth() {
   els.authOverlay.hidden = false;
+  setAuthMessage("");
   window.setTimeout(() => els.loginInput.focus(), 0);
 }
 
@@ -370,7 +390,6 @@ function registerUser() {
   };
   storageSet(USERS_KEY, users);
   setCurrentUser(login);
-  resetGameState();
   saveReady = true;
   saveGame();
   hideAuth();
@@ -384,10 +403,7 @@ function logoutUser() {
   setCurrentUser(null);
   saveReady = false;
   closeProfile();
-  resetGameState();
-  renderSlots();
-  renderAll();
-  showAuth();
+  showToast("Wylogowano. Możesz grać dalej jako gość.");
 }
 
 function initAuth() {
@@ -401,7 +417,7 @@ function initAuth() {
   }
 
   saveReady = false;
-  showAuth();
+  setCurrentUser(null);
 }
 
 function switchPanel(panelId) {
@@ -1455,6 +1471,8 @@ $("#useRouterBtn").addEventListener("click", useRouter);
 $("#buyLuckyCharmBtn").addEventListener("click", buyLuckyCharm);
 $("#profileBtn").addEventListener("click", openProfile);
 $("#profileCloseBtn").addEventListener("click", closeProfile);
+$("#openAuthBtn").addEventListener("click", showAuth);
+$("#authCloseBtn").addEventListener("click", hideAuth);
 $("#loginBtn").addEventListener("click", loginUser);
 $("#registerBtn").addEventListener("click", registerUser);
 $("#logoutBtn").addEventListener("click", logoutUser);
@@ -1471,6 +1489,9 @@ els.adminCodeInput.addEventListener("keydown", (event) => {
   });
 });
 els.profileModal.addEventListener("click", (event) => {
+  event.stopPropagation();
+});
+els.authModal.addEventListener("click", (event) => {
   event.stopPropagation();
 });
 els.profileOverlay.addEventListener("pointerdown", (event) => {
