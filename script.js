@@ -56,6 +56,19 @@ const ROULETTE_LABELS = {
 };
 const ADMIN_CODE = "codex";
 const EASTER_EGG_CODE = "67";
+const USERS_KEY = "inwestor2Users";
+const ACTIVE_USER_KEY = "inwestor2ActiveUser";
+const SAVE_PREFIX = "inwestor2Save:";
+const SAVE_VERSION = 1;
+
+const defaultCoins = JSON.parse(JSON.stringify(coins));
+const defaultState = JSON.parse(JSON.stringify({
+  ...state,
+  slotTimers: [],
+  miningTimer: null,
+  slotSpinning: false,
+  miningOn: false
+}));
 
 const $ = (selector) => document.querySelector(selector);
 
@@ -86,6 +99,14 @@ const els = {
   minersList: $("#minersList"),
   profileOverlay: $("#profileOverlay"),
   profileModal: $(".profile-modal"),
+  authOverlay: $("#authOverlay"),
+  loginInput: $("#loginInput"),
+  passwordInput: $("#passwordInput"),
+  loginBtn: $("#loginBtn"),
+  registerBtn: $("#registerBtn"),
+  authMessage: $("#authMessage"),
+  currentUserLabel: $("#currentUserLabel"),
+  logoutBtn: $("#logoutBtn"),
   adminCodeInput: $("#adminCodeInput"),
   adminEasterEgg: $("#adminEasterEgg"),
   adminPanel: $("#adminPanel"),
@@ -125,6 +146,8 @@ const els = {
 let lastCash = state.cash;
 let lastPortfolio = portfolioValue();
 let profilePointerStartedOnOverlay = false;
+let activeUser = null;
+let saveReady = false;
 
 function money(value) {
   if (value >= 1000) return value.toLocaleString("pl-PL", { maximumFractionDigits: 2 });
@@ -158,6 +181,227 @@ function showToast(message) {
   showToast.timer = window.setTimeout(() => {
     els.toast.classList.remove("is-visible");
   }, 2200);
+}
+
+function storageGet(key, fallback) {
+  try {
+    const raw = window.localStorage.getItem(key);
+    return raw ? JSON.parse(raw) : fallback;
+  } catch {
+    return fallback;
+  }
+}
+
+function storageSet(key, value) {
+  try {
+    window.localStorage.setItem(key, JSON.stringify(value));
+    return true;
+  } catch {
+    showToast("Nie udało się zapisać gry.");
+    return false;
+  }
+}
+
+function hashText(text) {
+  let hash = 2166136261;
+  for (let index = 0; index < text.length; index += 1) {
+    hash ^= text.charCodeAt(index);
+    hash = Math.imul(hash, 16777619);
+  }
+  return (hash >>> 0).toString(16);
+}
+
+function normalizedLogin() {
+  return els.loginInput.value.trim().toLowerCase();
+}
+
+function usersStore() {
+  return storageGet(USERS_KEY, {});
+}
+
+function setAuthMessage(message) {
+  els.authMessage.textContent = message;
+}
+
+function setCurrentUser(login) {
+  activeUser = login;
+  els.currentUserLabel.textContent = login || "-";
+  if (login) {
+    window.localStorage.setItem(ACTIVE_USER_KEY, login);
+  } else {
+    window.localStorage.removeItem(ACTIVE_USER_KEY);
+  }
+}
+
+function resetGameState() {
+  window.clearTimeout(state.miningTimer);
+  state.slotTimers.forEach((timer) => window.clearInterval(timer));
+
+  Object.keys(coins).forEach((symbol) => {
+    Object.assign(coins[symbol], JSON.parse(JSON.stringify(defaultCoins[symbol])));
+  });
+
+  Object.keys(state).forEach((key) => {
+    delete state[key];
+  });
+  Object.assign(state, JSON.parse(JSON.stringify(defaultState)));
+  state.slotTimers = [];
+  state.miningTimer = null;
+  lastCash = state.cash;
+  lastPortfolio = portfolioValue();
+}
+
+function saveKey(login = activeUser) {
+  return `${SAVE_PREFIX}${login}`;
+}
+
+function saveGame() {
+  if (!activeUser || !saveReady) return;
+
+  storageSet(saveKey(), {
+    version: SAVE_VERSION,
+    savedAt: Date.now(),
+    state: {
+      cash: state.cash,
+      activeCoin: state.activeCoin,
+      tickerCoin: state.tickerCoin,
+      level: state.level,
+      xp: state.xp,
+      selectedRouletteColor: state.selectedRouletteColor,
+      wins: state.wins,
+      miningCoin: state.miningCoin,
+      miners: state.miners,
+      nextMinerId: state.nextMinerId,
+      deposit: state.deposit,
+      loanDebt: state.loanDebt,
+      inventory: state.inventory,
+      xpBoostUntil: state.xpBoostUntil,
+      miningBoostUntil: state.miningBoostUntil
+    },
+    coins
+  });
+}
+
+function loadGame(login) {
+  resetGameState();
+  const save = storageGet(saveKey(login), null);
+
+  if (save?.coins) {
+    Object.entries(save.coins).forEach(([symbol, coin]) => {
+      if (coins[symbol]) Object.assign(coins[symbol], coin);
+    });
+  }
+
+  if (save?.state) {
+    Object.assign(state, save.state);
+    state.slotSpinning = false;
+    state.slotTimers = [];
+    state.miningOn = false;
+    state.miningTimer = null;
+    state.miners = Array.isArray(state.miners) && state.miners.length
+      ? state.miners
+      : JSON.parse(JSON.stringify(defaultState.miners));
+    state.inventory = {
+      energyDrink: 0,
+      router: 0,
+      luckyCharm: 0,
+      ...state.inventory
+    };
+  }
+
+  saveReady = true;
+}
+
+function showAuth() {
+  els.authOverlay.hidden = false;
+  window.setTimeout(() => els.loginInput.focus(), 0);
+}
+
+function hideAuth() {
+  els.authOverlay.hidden = true;
+}
+
+function loginUser() {
+  const login = normalizedLogin();
+  const password = els.passwordInput.value;
+  const users = usersStore();
+
+  if (!login || !password) {
+    setAuthMessage("Wpisz login i hasło.");
+    return;
+  }
+
+  if (!users[login] || users[login].password !== hashText(password)) {
+    setAuthMessage("Zły login albo hasło.");
+    return;
+  }
+
+  setCurrentUser(login);
+  loadGame(login);
+  hideAuth();
+  renderSlots();
+  renderAll();
+  showToast(`Witaj, ${login}.`);
+}
+
+function registerUser() {
+  const login = normalizedLogin();
+  const password = els.passwordInput.value;
+  const users = usersStore();
+
+  if (login.length < 3) {
+    setAuthMessage("Login musi mieć minimum 3 znaki.");
+    return;
+  }
+
+  if (password.length < 3) {
+    setAuthMessage("Hasło musi mieć minimum 3 znaki.");
+    return;
+  }
+
+  if (users[login]) {
+    setAuthMessage("Takie konto już istnieje.");
+    return;
+  }
+
+  users[login] = {
+    password: hashText(password),
+    createdAt: Date.now()
+  };
+  storageSet(USERS_KEY, users);
+  setCurrentUser(login);
+  resetGameState();
+  saveReady = true;
+  saveGame();
+  hideAuth();
+  renderSlots();
+  renderAll();
+  showToast(`Utworzono konto ${login}.`);
+}
+
+function logoutUser() {
+  saveGame();
+  setCurrentUser(null);
+  saveReady = false;
+  closeProfile();
+  resetGameState();
+  renderSlots();
+  renderAll();
+  showAuth();
+}
+
+function initAuth() {
+  const users = usersStore();
+  const login = window.localStorage.getItem(ACTIVE_USER_KEY);
+  if (login && users[login]) {
+    setCurrentUser(login);
+    loadGame(login);
+    hideAuth();
+    return;
+  }
+
+  saveReady = false;
+  showAuth();
 }
 
 function switchPanel(panelId) {
@@ -788,6 +1032,7 @@ function renderAll() {
   renderMining();
   renderBank();
   drawChart();
+  saveGame();
 }
 
 function spinSlots() {
@@ -1210,12 +1455,20 @@ $("#useRouterBtn").addEventListener("click", useRouter);
 $("#buyLuckyCharmBtn").addEventListener("click", buyLuckyCharm);
 $("#profileBtn").addEventListener("click", openProfile);
 $("#profileCloseBtn").addEventListener("click", closeProfile);
+$("#loginBtn").addEventListener("click", loginUser);
+$("#registerBtn").addEventListener("click", registerUser);
+$("#logoutBtn").addEventListener("click", logoutUser);
 $("#adminUnlockBtn").addEventListener("click", unlockAdminPanel);
 $("#adminAddMoneyBtn").addEventListener("click", addAdminMoney);
 $("#adminAddXpBtn").addEventListener("click", addAdminXp);
 $("#adminAdvanceTimeBtn").addEventListener("click", advanceAdminTime);
 els.adminCodeInput.addEventListener("keydown", (event) => {
   if (event.key === "Enter") unlockAdminPanel();
+});
+[els.loginInput, els.passwordInput].forEach((input) => {
+  input.addEventListener("keydown", (event) => {
+    if (event.key === "Enter") loginUser();
+  });
 });
 els.profileModal.addEventListener("click", (event) => {
   event.stopPropagation();
@@ -1255,6 +1508,9 @@ window.addEventListener("resize", updateRouletteRadius);
 window.setInterval(tickPrices, 1000);
 window.setInterval(renderBank, 1000);
 window.setInterval(renderInventory, 1000);
+window.setInterval(saveGame, 5000);
+window.addEventListener("beforeunload", saveGame);
+initAuth();
 updateRouletteRadius();
 renderSlots();
 renderAll();

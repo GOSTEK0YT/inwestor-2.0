@@ -6,7 +6,7 @@
     <title>Inwestor 2.0</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
-    <link rel="stylesheet" href="styles.css?v=slots-2">
+    <link rel="stylesheet" href="styles.css?v=save-1">
   </head>
   <body>
     <main class="shell">
@@ -318,10 +318,27 @@
     </main>
 
     <div id="toast" class="toast" role="status" aria-live="polite"></div>
+    <div id="authOverlay" class="modal-overlay auth-overlay">
+      <section class="profile-modal auth-modal" role="dialog" aria-modal="true" aria-labelledby="authTitle">
+        <h2 id="authTitle">Logowanie</h2>
+        <p class="quiet">Zaloguj się albo utwórz konto, żeby gra zapisywała postęp.</p>
+        <label for="loginInput">Login</label>
+        <input id="loginInput" type="text" autocomplete="username" placeholder="Nazwa gracza">
+        <label for="passwordInput">Hasło</label>
+        <input id="passwordInput" type="password" autocomplete="current-password" placeholder="Hasło">
+        <div class="auth-actions">
+          <button id="loginBtn" type="button">Zaloguj</button>
+          <button id="registerBtn" type="button" class="secondary">Utwórz konto</button>
+        </div>
+        <p id="authMessage" class="auth-message" aria-live="polite"></p>
+      </section>
+    </div>
     <div id="profileOverlay" class="modal-overlay" hidden>
       <section class="profile-modal" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
         <button id="profileCloseBtn" type="button" class="modal-close" aria-label="Zamknij">×</button>
         <h2 id="profileTitle">Profil</h2>
+        <p class="quiet">Zalogowano jako <strong id="currentUserLabel">-</strong>.</p>
+        <button id="logoutBtn" type="button" class="full secondary">Wyloguj</button>
         <label for="adminCodeInput">Miejsce na kod</label>
         <div class="input-row compact">
           <input id="adminCodeInput" type="password" autocomplete="off" placeholder="Wpisz kod">
@@ -354,6 +371,6 @@
         </div>
       </section>
     </div>
-    <script src="script.js?v=slots-2"></script>
+    <script src="script.js?v=save-1"></script>
   </body>
 </html>
