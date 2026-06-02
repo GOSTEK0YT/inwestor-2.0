@@ -260,7 +260,7 @@ function updateAuthUi() {
     els.profileSaveStatus.textContent = "Autozapis aktywny";
     els.openAuthBtn.hidden = true;
     els.logoutBtn.hidden = false;
-    els.deleteAccountBtn.hidden = false;
+    els.deleteAccountBtn.hidden = activeUser === "admin";
     return;
   }
 
@@ -504,6 +504,9 @@ function logoutUser() {
   setAuthToken(null);
   setCurrentUser(null);
   saveReady = false;
+  resetGameState();
+  renderSlots();
+  renderAll();
   closeProfile();
   showToast("Wylogowano. Możesz grać dalej jako gość.");
 }
