@@ -6,7 +6,7 @@
     <title>Inwestor 2.0</title>
     <link rel="icon" type="image/png" href="favicon.png">
     <link rel="apple-touch-icon" href="favicon.png">
-    <link rel="stylesheet" href="styles.css?v=save-2">
+    <link rel="stylesheet" href="styles.css?v=save-4">
   </head>
   <body>
     <main class="shell">
@@ -338,10 +338,25 @@
       <section class="profile-modal" role="dialog" aria-modal="true" aria-labelledby="profileTitle">
         <button id="profileCloseBtn" type="button" class="modal-close" aria-label="Zamknij">×</button>
         <h2 id="profileTitle">Profil</h2>
-        <p class="quiet" id="profileSaveStatus">Grasz jako gość. Zaloguj się, żeby zapisać postęp.</p>
-        <p class="quiet">Konto: <strong id="currentUserLabel">gość</strong></p>
+        <div class="account-info">
+          <h3>Informacje o koncie</h3>
+          <div>
+            <span>Tryb gry</span>
+            <strong id="profileModeLabel">Gość</strong>
+          </div>
+          <div>
+            <span>Konto</span>
+            <strong id="currentUserLabel">gość</strong>
+          </div>
+          <div>
+            <span>Zapis</span>
+            <strong id="profileSaveStatus">Zaloguj się, żeby zapisać postęp.</strong>
+          </div>
+        </div>
         <button id="openAuthBtn" type="button" class="full">Zaloguj / zapisz grę</button>
+        <button id="resetProgressBtn" type="button" class="full secondary">Reset postępu</button>
         <button id="logoutBtn" type="button" class="full secondary">Wyloguj</button>
+        <button id="deleteAccountBtn" type="button" class="full danger">Usuń konto</button>
         <label for="adminCodeInput">Miejsce na kod</label>
         <div class="input-row compact">
           <input id="adminCodeInput" type="password" autocomplete="off" placeholder="Wpisz kod">
@@ -374,6 +389,6 @@
         </div>
       </section>
     </div>
-    <script src="script.js?v=save-2"></script>
+    <script src="script.js?v=save-4"></script>
   </body>
 </html>

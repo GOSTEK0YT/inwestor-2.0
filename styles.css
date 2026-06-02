@@ -75,6 +75,11 @@ button.secondary {
   color: var(--button-ink);
 }
 
+button.danger {
+  background: var(--red);
+  color: #fff;
+}
+
 button.full {
   width: 100%;
   margin-top: 0.85rem;
@@ -1284,6 +1289,39 @@ canvas {
   margin: 0.8rem 0 0;
   color: var(--accent);
   font-weight: 800;
+}
+
+.account-info {
+  display: grid;
+  gap: 0.65rem;
+  margin: 0.9rem 0 1rem;
+  border: 1px solid var(--line);
+  border-radius: 8px;
+  padding: 0.9rem;
+  background: #101419;
+}
+
+.account-info h3 {
+  margin: 0 0 0.2rem;
+  font-size: 1rem;
+}
+
+.account-info div {
+  display: flex;
+  justify-content: space-between;
+  gap: 1rem;
+  border-top: 1px solid rgba(255, 255, 255, 0.06);
+  padding-top: 0.55rem;
+}
+
+.account-info span {
+  color: var(--muted);
+  font-weight: 700;
+}
+
+.account-info strong {
+  color: var(--ink);
+  text-align: right;
 }
 
 .modal-close {

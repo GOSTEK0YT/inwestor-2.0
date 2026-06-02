@@ -107,10 +107,13 @@ const els = {
   loginBtn: $("#loginBtn"),
   registerBtn: $("#registerBtn"),
   authMessage: $("#authMessage"),
+  profileModeLabel: $("#profileModeLabel"),
   profileSaveStatus: $("#profileSaveStatus"),
   currentUserLabel: $("#currentUserLabel"),
   openAuthBtn: $("#openAuthBtn"),
+  resetProgressBtn: $("#resetProgressBtn"),
   logoutBtn: $("#logoutBtn"),
+  deleteAccountBtn: $("#deleteAccountBtn"),
   adminCodeInput: $("#adminCodeInput"),
   adminEasterEgg: $("#adminEasterEgg"),
   adminPanel: $("#adminPanel"),
@@ -229,17 +232,21 @@ function setAuthMessage(message) {
 
 function updateAuthUi() {
   if (activeUser) {
+    els.profileModeLabel.textContent = "Zapisane konto";
     els.currentUserLabel.textContent = activeUser;
-    els.profileSaveStatus.textContent = "Postęp zapisuje się automatycznie na tym koncie.";
+    els.profileSaveStatus.textContent = "Autozapis aktywny";
     els.openAuthBtn.hidden = true;
     els.logoutBtn.hidden = false;
+    els.deleteAccountBtn.hidden = false;
     return;
   }
 
+  els.profileModeLabel.textContent = "Gość";
   els.currentUserLabel.textContent = "gość";
-  els.profileSaveStatus.textContent = "Grasz jako gość. Zaloguj się, żeby zapisać postęp.";
+  els.profileSaveStatus.textContent = "Niezapisany";
   els.openAuthBtn.hidden = false;
   els.logoutBtn.hidden = true;
+  els.deleteAccountBtn.hidden = true;
 }
 
 function setCurrentUser(login) {
@@ -404,6 +411,35 @@ function logoutUser() {
   saveReady = false;
   closeProfile();
   showToast("Wylogowano. Możesz grać dalej jako gość.");
+}
+
+function resetProgress() {
+  const confirmed = window.confirm("Zresetować cały postęp gry?");
+  if (!confirmed) return;
+
+  resetGameState();
+  saveReady = Boolean(activeUser);
+  renderSlots();
+  renderAll();
+  closeProfile();
+  showToast(activeUser ? "Postęp konta zresetowany." : "Postęp gościa zresetowany.");
+}
+
+function deleteAccount() {
+  if (!activeUser) return;
+
+  const login = activeUser;
+  const confirmed = window.confirm(`Usunąć konto "${login}" i jego zapis gry?`);
+  if (!confirmed) return;
+
+  const users = usersStore();
+  delete users[login];
+  storageSet(USERS_KEY, users);
+  window.localStorage.removeItem(saveKey(login));
+  setCurrentUser(null);
+  saveReady = false;
+  closeProfile();
+  showToast("Konto i zapis zostały usunięte.");
 }
 
 function initAuth() {
@@ -1475,7 +1511,9 @@ $("#openAuthBtn").addEventListener("click", showAuth);
 $("#authCloseBtn").addEventListener("click", hideAuth);
 $("#loginBtn").addEventListener("click", loginUser);
 $("#registerBtn").addEventListener("click", registerUser);
+$("#resetProgressBtn").addEventListener("click", resetProgress);
 $("#logoutBtn").addEventListener("click", logoutUser);
+$("#deleteAccountBtn").addEventListener("click", deleteAccount);
 $("#adminUnlockBtn").addEventListener("click", unlockAdminPanel);
 $("#adminAddMoneyBtn").addEventListener("click", addAdminMoney);
 $("#adminAddXpBtn").addEventListener("click", addAdminXp);
